@@ -1,8 +1,8 @@
 package _experimental.putter;
 
-import _experimental.cycle1.EasyPath;
-import _experimental.cycle1.EasyPool;
-import _experimental.cycle1.EasyTetfu;
+import helper.EasyPath;
+import helper.EasyPool;
+import helper.EasyTetfu;
 import common.datastore.BlockCounter;
 import common.datastore.OperationWithKey;
 import core.field.Field;

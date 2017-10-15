@@ -1,8 +1,8 @@
 package _experimental.cycle2;
 
-import _experimental.cycle1.EasyPath;
-import _experimental.cycle1.EasyPool;
-import _experimental.cycle1.EasyTetfu;
+import helper.EasyPath;
+import helper.EasyPool;
+import helper.EasyTetfu;
 import common.buildup.BuildUpStream;
 import common.datastore.*;
 import common.datastore.pieces.Blocks;

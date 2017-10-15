@@ -1,7 +1,7 @@
 package _experimental.cycle2;
 
-import _experimental.cycle1.EasyPath;
-import _experimental.cycle1.EasyPool;
+import helper.EasyPath;
+import helper.EasyPool;
 import common.datastore.BlockCounter;
 import common.datastore.pieces.LongBlocks;
 import common.order.ForwardOrderLookUp;

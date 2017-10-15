@@ -16,6 +16,8 @@ import core.mino.Block;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.MinoRotation;
+import helper.EasyPath;
+import helper.EasyTetfu;
 import searcher.pack.memento.MinoFieldMemento;
 import searcher.pack.task.Result;
 
