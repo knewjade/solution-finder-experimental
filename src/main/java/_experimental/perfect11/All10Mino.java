@@ -1,6 +1,5 @@
 package _experimental.perfect11;
 
-import lib.Stopwatch;
 import common.parser.OperationWithKeyInterpreter;
 import concurrent.LockedReachableThreadLocal;
 import core.column_field.ColumnField;
@@ -9,6 +8,7 @@ import core.field.FieldFactory;
 import core.field.FieldView;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
+import lib.Stopwatch;
 import searcher.pack.InOutPairField;
 import searcher.pack.SeparableMinos;
 import searcher.pack.SizedBit;
@@ -19,7 +19,7 @@ import searcher.pack.mino_fields.MinoFields;
 import searcher.pack.solutions.BasicSolutionsCalculator;
 import searcher.pack.solutions.MappedBasicSolutions;
 import searcher.pack.task.Field4x10MinoPackingHelper;
-import searcher.pack.task.PackSearcher;
+import searcher.pack.task.PerfectPackSearcher;
 import searcher.pack.task.TaskResultHelper;
 
 import java.io.*;
@@ -54,7 +54,7 @@ public class All10Mino {
         SolutionFilter solutionFilter = new SRSValidSolutionFilter(field, reachableThreadLocal, sizedBit);
 
         BasicSolutions basicSolutions = new MappedBasicSolutions(calculate, solutionFilter);
-        PackSearcher searcher = createSearcher(sizedBit, basicSolutions, field, solutionFilter);
+        PerfectPackSearcher searcher = createSearcher(sizedBit, basicSolutions, field, solutionFilter);
 
         Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
 
@@ -90,7 +90,7 @@ public class All10Mino {
         System.out.println("solutions = " + counter);
     }
 
-    private static PackSearcher createSearcher(SizedBit sizedBit, BasicSolutions basicSolutions, Field initField, SolutionFilter solutionFilter) throws InterruptedException, ExecutionException {
+    private static PerfectPackSearcher createSearcher(SizedBit sizedBit, BasicSolutions basicSolutions, Field initField, SolutionFilter solutionFilter) throws InterruptedException, ExecutionException {
         // フィールドの変換
         int width = sizedBit.getWidth();
         int height = sizedBit.getHeight();
@@ -98,6 +98,6 @@ public class All10Mino {
 
         // 探索準備
         TaskResultHelper taskResultHelper = new Field4x10MinoPackingHelper();
-        return new PackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
+        return new PerfectPackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
     }
 }

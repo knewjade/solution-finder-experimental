@@ -1,5 +1,6 @@
 package _experimental.mino6;
 
+import common.SyntaxException;
 import common.datastore.Pair;
 import common.datastore.action.Action;
 import common.datastore.pieces.Blocks;
@@ -33,7 +34,7 @@ import static java.util.Collections.singletonList;
 
 // フィールドからパフェ率順に並び替えてテト譜を作る
 public class FieldSortMain {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SyntaxException {
         // ファイルから読み込む
         Charset charset = Charset.defaultCharset();
         File file = new File("test");

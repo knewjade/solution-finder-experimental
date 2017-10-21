@@ -1,6 +1,5 @@
 package _experimental.perfect11;
 
-import lib.Stopwatch;
 import common.datastore.BlockField;
 import common.tetfu.TetfuElement;
 import common.tetfu.common.ColorConverter;
@@ -18,6 +17,7 @@ import core.mino.Block;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.Rotate;
+import lib.Stopwatch;
 import searcher.pack.InOutPairField;
 import searcher.pack.SeparableMinos;
 import searcher.pack.SizedBit;
@@ -27,7 +27,7 @@ import searcher.pack.memento.SolutionFilter;
 import searcher.pack.solutions.FilterOnDemandBasicSolutions;
 import searcher.pack.task.BasicMinoPackingHelper;
 import searcher.pack.task.Field4x10MinoPackingHelper;
-import searcher.pack.task.PackSearcher;
+import searcher.pack.task.PerfectPackSearcher;
 import searcher.pack.task.TaskResultHelper;
 
 import java.util.List;
@@ -48,7 +48,7 @@ public class HighHeightPathMain {
         ColumnSmallField initOuterField2 = InOutPairField.createMaxOuterBoard(3, 4, field2);
         System.out.println(ColumnFieldView.toString(initOuterField2, 6, 4));
 
-    System.exit(0);
+        System.exit(0);
 
         int width = 2;
         int height = 8;
@@ -58,15 +58,15 @@ public class HighHeightPathMain {
         SeparableMinos separableMinos = SeparableMinos.createSeparableMinos(minoFactory, minoShifter, sizedBit);
 
         Field field = FieldFactory.createField("" +
-                "X_XXXXXXXX" +
-                "X_XXXXXXXX" +
-                "X_XXXXXXXX" +
-                "X_XXXXXXXX" +
-                "X_XXXXXXXX" +
-                "X_XXXXXXXX" +
-                "X_XXXXXXXX" +
-                "X_XXXXXXXX" +
-                ""
+                        "X_XXXXXXXX" +
+                        "X_XXXXXXXX" +
+                        "X_XXXXXXXX" +
+                        "X_XXXXXXXX" +
+                        "X_XXXXXXXX" +
+                        "X_XXXXXXXX" +
+                        "X_XXXXXXXX" +
+                        "X_XXXXXXXX" +
+                        ""
 //                "__XXXXXXXX" +
 //                "__XXXXXXXX" +
 //                "___XXXXXXX" +
@@ -89,7 +89,7 @@ public class HighHeightPathMain {
         SolutionFilter solutionFilter = new SRSValidSolutionFilter(field, reachableThreadLocal, sizedBit);
         Predicate<ColumnField> predicate = BasicSolutions.createBitCountPredicate(2);
         BasicSolutions basicSolutions = new FilterOnDemandBasicSolutions(separableMinos, sizedBit, predicate, solutionFilter);
-        PackSearcher searcher = createSearcher(sizedBit, basicSolutions, field, solutionFilter);
+        PerfectPackSearcher searcher = createSearcher(sizedBit, basicSolutions, field, solutionFilter);
 
         Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
 
@@ -137,7 +137,7 @@ public class HighHeightPathMain {
         System.out.println(Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB");
     }
 
-    private static PackSearcher createSearcher(SizedBit sizedBit, BasicSolutions basicSolutions, Field initField, SolutionFilter solutionFilter) throws InterruptedException, ExecutionException {
+    private static PerfectPackSearcher createSearcher(SizedBit sizedBit, BasicSolutions basicSolutions, Field initField, SolutionFilter solutionFilter) throws InterruptedException, ExecutionException {
         // フィールドの変換
         int width = sizedBit.getWidth();
         int height = sizedBit.getHeight();
@@ -145,7 +145,7 @@ public class HighHeightPathMain {
 
         // 探索準備
         TaskResultHelper taskResultHelper = createTaskResultHelper(sizedBit);
-        return new PackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
+        return new PerfectPackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
     }
 
     private static TaskResultHelper createTaskResultHelper(SizedBit sizedBit) {

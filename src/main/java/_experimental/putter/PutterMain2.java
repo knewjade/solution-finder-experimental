@@ -1,5 +1,6 @@
 package _experimental.putter;
 
+import common.SyntaxException;
 import common.datastore.Pair;
 import common.datastore.Result;
 import common.datastore.action.Action;
@@ -30,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class PutterMain2 {
-    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException, SyntaxException {
         List<String> setupPattern = Arrays.asList(
 //                "I,O,L,J",
 //                "I,O,S,Z",
@@ -82,7 +83,12 @@ public class PutterMain2 {
                 .map(names -> String.format("[%s]!", names))
                 .map(s -> {
                     System.out.println(s);
-                    BlocksGenerator blocksGenerator = new BlocksGenerator(s);
+                    BlocksGenerator blocksGenerator = null;
+                    try {
+                        blocksGenerator = new BlocksGenerator(s);
+                    } catch (SyntaxException e) {
+                        e.printStackTrace();
+                    }
                     return new Pair<>(s, blocksGenerator.blocksStream().parallel()
                             .flatMap(blocks -> {
                                 LockedCandidate candidate = new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine);

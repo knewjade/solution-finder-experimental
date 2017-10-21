@@ -1,5 +1,6 @@
 package _experimental.perfect11;
 
+import common.SyntaxException;
 import common.datastore.pieces.Blocks;
 import common.pattern.BlocksGenerator;
 import common.pattern.IBlocksGenerator;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AllPatternsMain {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SyntaxException {
         switch (args[0]) {
             case "use11":
                 runOnHold11(Integer.valueOf(args[1]));
@@ -26,7 +27,7 @@ public class AllPatternsMain {
         }
     }
 
-    private static void runOnHold11(int index) throws IOException {
+    private static void runOnHold11(int index) throws IOException, SyntaxException {
         // 7種1巡で可能性のあるツモ順
         // 4line on hold
         List<String> patternsOnHold = Arrays.asList(
@@ -44,12 +45,12 @@ public class AllPatternsMain {
         createOnHold11(pattern, index);
     }
 
-    private static void createOnHold11(String pattern, int index) throws IOException {
+    private static void createOnHold11(String pattern, int index) throws IOException, SyntaxException {
         String path = String.format("output/order%donhold11.csv", index + 1);
         output(pattern, path);
     }
 
-    private static void runOnHold10(int index) throws IOException {
+    private static void runOnHold10(int index) throws IOException, SyntaxException {
         // 7種1巡で可能性のあるツモ順
         // 4line on hold
         List<String> patternsOnHold = Arrays.asList(
@@ -67,12 +68,12 @@ public class AllPatternsMain {
         createOnHold10(pattern, index);
     }
 
-    private static void createOnHold10(String pattern, int index) throws IOException {
+    private static void createOnHold10(String pattern, int index) throws IOException, SyntaxException {
         String path = String.format("output/order%donhold10.csv", index + 1);
         output(pattern, path);
     }
 
-    private static void runWithoutHold(int index) throws IOException {
+    private static void runWithoutHold(int index) throws IOException, SyntaxException {
         // 4line without hold
         List<String> patternsWithoutHold = Arrays.asList(
                 "*p7, *p3",
@@ -88,15 +89,15 @@ public class AllPatternsMain {
         createWithoutHold(pattern, index);
     }
 
-    private static void createWithoutHold(String pattern, int index) throws IOException {
+    private static void createWithoutHold(String pattern, int index) throws IOException, SyntaxException {
         String path = String.format("output/order%davoid.csv", index + 1);
         output(pattern, path);
     }
 
-    private static void output(String pattern, String path) throws IOException {
+    private static void output(String pattern, String path) throws IOException, SyntaxException {
         File outputFile = new File(path);
+        IBlocksGenerator generator = new BlocksGenerator(pattern);
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
-            IBlocksGenerator generator = new BlocksGenerator(pattern);
             generator.blocksStream()
                     .map(Blocks::getBlocks)
                     .map(blocks -> blocks.stream().map(Block::getName).collect(Collectors.joining()))

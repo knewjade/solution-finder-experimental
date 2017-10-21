@@ -1,5 +1,6 @@
 package _experimental.unused;
 
+import common.SyntaxException;
 import common.comparator.OperationWithKeyComparator;
 import common.datastore.BlockCounter;
 import common.datastore.OperationWithKey;
@@ -26,7 +27,7 @@ import searcher.pack.mino_fields.RecursiveMinoFields;
 import searcher.pack.solutions.BasicSolutionsCalculator;
 import searcher.pack.solutions.MappedBasicSolutions;
 import searcher.pack.task.Field4x10MinoPackingHelper;
-import searcher.pack.task.PackSearcher;
+import searcher.pack.task.PerfectPackSearcher;
 import searcher.pack.task.TaskResultHelper;
 
 import java.io.*;
@@ -45,7 +46,7 @@ public class PackMain {
     private static final int WIDTH = 3;
     private static final int HEIGHT = 4;
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, SyntaxException {
         List<String> allOnHold = Arrays.asList(
                 "*p7, *p4",
                 "*, *p3, *p7",
@@ -102,7 +103,7 @@ public class PackMain {
         // TODO: すでにフィールドが埋まっている場合は探索しない
         List<InOutPairField> inOutPairFields = InOutPairField.createInOutPairFields(WIDTH, HEIGHT, initField);
         TaskResultHelper taskResultHelper = new Field4x10MinoPackingHelper();
-        PackSearcher searcher = new PackSearcher(inOutPairFields, solutions, sizedBit, solutionFilter, taskResultHelper);
+        PerfectPackSearcher searcher = new PerfectPackSearcher(inOutPairFields, solutions, sizedBit, solutionFilter, taskResultHelper);
 
         // ファイルに書き出すとき
         ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();

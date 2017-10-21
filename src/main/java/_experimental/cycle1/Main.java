@@ -1,5 +1,6 @@
 package _experimental.cycle1;
 
+import common.SyntaxException;
 import common.buildup.BuildUp;
 import common.comparator.PiecesNameComparator;
 import common.datastore.BlockCounter;
@@ -32,7 +33,7 @@ public class Main {
         ALL_BLOCKS.sort(Comparator.comparing(Block::getName));
     }
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, SyntaxException {
         // フィールドの指定
         Field initField = FieldFactory.createField("" +
                 "XXXXX_____" +

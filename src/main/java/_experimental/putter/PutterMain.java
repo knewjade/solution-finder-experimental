@@ -1,5 +1,6 @@
 package _experimental.putter;
 
+import common.SyntaxException;
 import common.datastore.BlockCounter;
 import common.datastore.Pair;
 import common.datastore.action.Action;
@@ -33,7 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class PutterMain {
-    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException, SyntaxException {
         MinoFactory minoFactory = new MinoFactory();
         PerfectValidator validator = new PerfectValidator();
         PutterUsingHold<Action> putter = new PutterUsingHold<>(minoFactory, validator);

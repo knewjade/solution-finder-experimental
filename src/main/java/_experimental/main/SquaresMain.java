@@ -73,7 +73,7 @@ public class SquaresMain {
         TaskResultHelper taskResultHelper = getMinoPackingHelper(squareHeight);
         LockedReachableThreadLocal lockedReachableThreadLocal = new LockedReachableThreadLocal(squareHeight);
         SolutionFilter solutionFilter = new SRSValidSolutionFilter(field, lockedReachableThreadLocal, sizedBit);
-        PackSearcher searcher = new PackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
+        PerfectPackSearcher searcher = new PerfectPackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
         List<Result> results = searcher.toList();
 
         Map<BlockCounter, List<Result>> eachBlockCounter = results.stream()

@@ -20,7 +20,7 @@ import searcher.pack.mino_fields.RecursiveMinoFields;
 import searcher.pack.solutions.BasicSolutionsCalculator;
 import searcher.pack.solutions.MappedBasicSolutions;
 import searcher.pack.task.Field4x10MinoPackingHelper;
-import searcher.pack.task.PackSearcher;
+import searcher.pack.task.PerfectPackSearcher;
 import searcher.pack.task.TaskResultHelper;
 
 import java.io.*;
@@ -59,7 +59,7 @@ public class SquareFigureStep1 {
         // 初期化: PackSearcher
         SolutionFilter solutionFilter = createSRSSolutionFilter(sizedBit, initField);
         TaskResultHelper taskResultHelper = new Field4x10MinoPackingHelper();
-        PackSearcher searcher = new PackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
+        PerfectPackSearcher searcher = new PerfectPackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
         System.out.println(searcher.count());
 
         // 初期化: ExecutorService
@@ -103,11 +103,11 @@ public class SquareFigureStep1 {
         return new SRSValidSolutionFilter(initField, lockedReachableThreadLocal, sizedBit);
     }
 
-    private final PackSearcher searcher;
+    private final PerfectPackSearcher searcher;
     private final BufferedWriter bufferedWriter;
     private final ExecutorService executorService;
 
-    private SquareFigureStep1(PackSearcher searcher, BufferedWriter bufferedWriter, ExecutorService executorService) {
+    private SquareFigureStep1(PerfectPackSearcher searcher, BufferedWriter bufferedWriter, ExecutorService executorService) {
         this.searcher = searcher;
         this.bufferedWriter = bufferedWriter;
         this.executorService = executorService;

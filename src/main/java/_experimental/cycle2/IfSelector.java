@@ -1,8 +1,6 @@
 package _experimental.cycle2;
 
-import helper.EasyPath;
-import helper.EasyPool;
-import helper.EasyTetfu;
+import common.SyntaxException;
 import common.buildup.BuildUpStream;
 import common.datastore.*;
 import common.datastore.pieces.Blocks;
@@ -32,6 +30,9 @@ import core.mino.Mino;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.MinoRotation;
+import helper.EasyPath;
+import helper.EasyPool;
+import helper.EasyTetfu;
 import searcher.pack.SeparableMinos;
 import searcher.pack.SizedBit;
 import searcher.pack.calculator.BasicSolutions;
@@ -68,7 +69,7 @@ public class IfSelector {
         }
     }
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException, SyntaxException {
         ExecutorService executorService = Executors.newFixedThreadPool(4);
 
         int width = 3;

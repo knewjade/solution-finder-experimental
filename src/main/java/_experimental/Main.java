@@ -1,5 +1,6 @@
 package _experimental;
 
+import common.SyntaxException;
 import common.comparator.PiecesNameComparator;
 import common.datastore.action.Action;
 import common.datastore.pieces.Blocks;
@@ -26,11 +27,11 @@ import java.util.stream.Collectors;
 import static core.mino.Block.*;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SyntaxException {
         start();
     }
 
-    private static void start() {
+    private static void start() throws SyntaxException {
         PatternTree tree = new PatternTree();
 //        PiecesGenerator blocksGenerator = new BlocksGenerator("I,I,J,L,O,[SZT]p3,*p3");
         IBlocksGenerator blocksGenerator = new BlocksGenerator("I,I,J,L,O,S,Z,T,*p3");

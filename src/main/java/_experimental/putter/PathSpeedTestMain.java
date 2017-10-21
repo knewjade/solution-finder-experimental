@@ -21,7 +21,7 @@ import searcher.pack.mino_fields.RecursiveMinoFields;
 import searcher.pack.solutions.BasicSolutionsCalculator;
 import searcher.pack.solutions.MappedBasicSolutions;
 import searcher.pack.task.Field4x10MinoPackingHelper;
-import searcher.pack.task.PackSearcher;
+import searcher.pack.task.PerfectPackSearcher;
 import searcher.pack.task.Result;
 import searcher.pack.task.TaskResultHelper;
 
@@ -51,7 +51,7 @@ public class PathSpeedTestMain {
         for (int count = 0; count < 30; count++) {
             System.out.println(count);
             List<InOutPairField> inOutPairFields = InOutPairField.createInOutPairFields(sizedBit, initField);
-            PackSearcher searcher = new PackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
+            PerfectPackSearcher searcher = new PerfectPackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
             List<Result> results = searcher.toList();
         }
 
@@ -59,7 +59,7 @@ public class PathSpeedTestMain {
 
         Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
         List<InOutPairField> inOutPairFields = InOutPairField.createInOutPairFields(sizedBit, initField);
-        PackSearcher searcher = new PackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
+        PerfectPackSearcher searcher = new PerfectPackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
         List<Result> results = searcher.toList();
 
         List<MinoFieldMemento> results2 = searcher.stream(resultStream ->

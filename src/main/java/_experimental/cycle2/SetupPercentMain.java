@@ -1,5 +1,6 @@
 package _experimental.cycle2;
 
+import common.SyntaxException;
 import helper.EasyPath;
 import helper.EasyPool;
 import common.datastore.BlockCounter;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SetupPercentMain {
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, SyntaxException {
         int width = 3;
         int height = 4;
 
