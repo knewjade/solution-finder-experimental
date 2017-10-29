@@ -61,7 +61,7 @@ public class Main {
         for (Result result : results) {
             System.out.println(result.getMemento().getOperationsStream(width).collect(Collectors.toList()));
             for (OperationWithKey operationWithKey : result.getMemento().getOperationsStream(width).collect(Collectors.toList())) {
-                System.out.println(operationWithKey.getMino().getBlock());
+                System.out.println(operationWithKey.getBlock());
             }
         }
 

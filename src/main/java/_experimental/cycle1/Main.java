@@ -20,6 +20,7 @@ import core.srs.MinoRotation;
 import helper.EasyPath;
 import helper.EasyTetfu;
 import searcher.pack.memento.MinoFieldMemento;
+import searcher.pack.separable_mino.SeparableMino;
 import searcher.pack.task.Result;
 
 import java.util.*;
@@ -92,7 +93,7 @@ public class Main {
                                     BlockCounter blockCounter = new BlockCounter(longBlocks.blockStream());
                                     return perfectUsingBlockCounter.containsAll(blockCounter);
                                 })
-                                .anyMatch(longBlocks -> BuildUp.existsValidByOrder(initField, memento.getOperationsStream(width), longBlocks.getBlocks(), height, reachable));
+                                .anyMatch(longBlocks -> BuildUp.existsValidByOrder(initField, memento.getSeparableMinoStream(width).map(SeparableMino::toMinoOperationWithKey), longBlocks.getBlocks(), height, reachable));
                     })
                     .map(memento -> {
                         BlockCounter blockCounter = memento.getSumBlockCounter();

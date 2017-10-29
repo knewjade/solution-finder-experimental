@@ -1,7 +1,7 @@
 package _experimental.perfect11;
 
 import common.buildup.BuildUp;
-import common.datastore.OperationWithKey;
+import common.datastore.MinoOperationWithKey;
 import common.datastore.blocks.LongBlocks;
 import common.order.OrderLookup;
 import common.parser.BlockInterpreter;
@@ -61,7 +61,7 @@ public class Filter10MinoPerfectMain {
 
             // パフェ地形一覧
             MinoFactory minoFactory = new MinoFactory();
-            List<List<OperationWithKey>> perfects = Files.lines(perfectsFile.toPath(), Charset.forName("UTF-8"))
+            List<List<MinoOperationWithKey>> perfects = Files.lines(perfectsFile.toPath(), Charset.forName("UTF-8"))
                     .map(line -> OperationWithKeyInterpreter.parseToList(line, minoFactory))
                     .collect(Collectors.toList());
 

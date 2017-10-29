@@ -1,9 +1,9 @@
 package _experimental.square4x10;
 
 import common.datastore.BlockCounter;
+import common.datastore.MinoOperationWithKey;
 import common.datastore.OperationWithKey;
 import common.parser.OperationWithKeyInterpreter;
-import core.mino.Mino;
 import core.mino.MinoFactory;
 
 import java.io.BufferedWriter;
@@ -31,13 +31,12 @@ public class SquareFigureStep2 {
             Files.lines(Paths.get(inputPath))
                     .parallel()
                     .filter(s -> {
-                        Stream<OperationWithKey> operationWithKeyStream = OperationWithKeyInterpreter.parseToStream(s, minoFactory);
+                        Stream<MinoOperationWithKey> operationWithKeyStream = OperationWithKeyInterpreter.parseToStream(s, minoFactory);
 
                         // BlockCounterに変換
                         BlockCounter blockCounter = new BlockCounter(
                                 operationWithKeyStream
-                                        .map(OperationWithKey::getMino)
-                                        .map(Mino::getBlock)
+                                        .map(OperationWithKey::getBlock)
                         );
 
                         return SevenBagFilter.isIn7Bag(blockCounter);

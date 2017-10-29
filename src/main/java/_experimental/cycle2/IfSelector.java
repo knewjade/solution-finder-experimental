@@ -26,7 +26,6 @@ import core.field.FieldFactory;
 import core.field.FieldView;
 import core.field.SmallField;
 import core.mino.Block;
-import core.mino.Mino;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.MinoRotation;
@@ -39,6 +38,7 @@ import searcher.pack.calculator.BasicSolutions;
 import searcher.pack.memento.SRSValidSolutionFilter;
 import searcher.pack.memento.SolutionFilter;
 import searcher.pack.mino_fields.RecursiveMinoFields;
+import searcher.pack.separable_mino.SeparableMino;
 import searcher.pack.solutions.BasicSolutionsCalculator;
 import searcher.pack.solutions.MappedBasicSolutions;
 import searcher.pack.task.Result;
@@ -130,14 +130,15 @@ public class IfSelector {
             // すべてのパフェ手順を取得
             List<Result> results = easyPath.calculate(initField, width, height)
                     .stream()
-                    .filter(result -> allIncluded.containsAll(new BlockCounter(result.getMemento().getOperationsStream(width).map(OperationWithKey::getMino).map(Mino::getBlock))))
+                    .filter(result -> allIncluded.containsAll(new BlockCounter(result.getMemento().getOperationsStream(width).map(OperationWithKey::getBlock))))
                     .collect(Collectors.toList());
             System.out.println("result size: " + results.size());
 
             for (Result result : results) {
                 // パフェ手順から組み立てられるミノ順を抽出
-                List<OperationWithKey> operationWithKeys = result.getMemento()
-                        .getOperationsStream(width)
+                List<MinoOperationWithKey> operationWithKeys = result.getMemento()
+                        .getSeparableMinoStream(width)
+                        .map(SeparableMino::toMinoOperationWithKey)
                         .collect(Collectors.toList());
                 assert operationWithKeys.size() == maxDepth;
 
@@ -194,8 +195,9 @@ public class IfSelector {
 
             // パフェ手順から組み立てられるミノ順を抽出
             Result result1 = resultList.get(0);
-            List<OperationWithKey> operationWithKeys1 = result1.getMemento()
-                    .getOperationsStream(width)
+            List<MinoOperationWithKey> operationWithKeys1 = result1.getMemento()
+                    .getSeparableMinoStream(width)
+                    .map(SeparableMino::toMinoOperationWithKey)
                     .collect(Collectors.toList());
             assert operationWithKeys1.size() == maxDepth;
             AnalyzeTree possibleTree1 = getPossibleBuildingTree(initField, operationWithKeys1, buildUpStream);
@@ -204,8 +206,9 @@ public class IfSelector {
 
             // パフェ手順から組み立てられるミノ順を抽出
             Result result2 = resultList.get(1);
-            List<OperationWithKey> operationWithKeys2 = result2.getMemento()
-                    .getOperationsStream(width)
+            List<MinoOperationWithKey> operationWithKeys2 = result2.getMemento()
+                    .getSeparableMinoStream(width)
+                    .map(SeparableMino::toMinoOperationWithKey)
                     .collect(Collectors.toList());
             assert operationWithKeys2.size() == maxDepth;
             AnalyzeTree possibleTree2 = getPossibleBuildingTree(initField, operationWithKeys2, buildUpStream);
@@ -339,11 +342,10 @@ public class IfSelector {
         return new Pair<>(resultTreeTrue, resultTreeFalse);
     }
 
-    private static AnalyzeTree getPossibleBuildingTree(Field field, List<OperationWithKey> operationWithKeys, BuildUpStream buildUpStream) {
+    private static AnalyzeTree getPossibleBuildingTree(Field field, List<MinoOperationWithKey> operationWithKeys, BuildUpStream buildUpStream) {
         Set<LongBlocks> canBuild = buildUpStream.existsValidBuildPattern(field, operationWithKeys)
                 .map(List::stream)
-                .map(stream -> stream.map(OperationWithKey::getMino))
-                .map(stream -> stream.map(Mino::getBlock))
+                .map(stream -> stream.map(OperationWithKey::getBlock))
                 .map(LongBlocks::new)
                 .collect(Collectors.toSet());
 

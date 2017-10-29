@@ -25,6 +25,7 @@ import searcher.pack.SeparableMinos;
 import searcher.pack.SizedBit;
 import searcher.pack.memento.SRSValidSolutionFilter;
 import searcher.pack.memento.SolutionFilter;
+import searcher.pack.separable_mino.SeparableMino;
 import searcher.pack.solutions.OnDemandBasicSolutions;
 import searcher.pack.task.*;
 import searcher.pack.task.Result;
@@ -80,13 +81,11 @@ public class SquaresMain {
                 .filter(result -> {
                     // BlockCounterに変換
                     BlockCounter blockCounter = new BlockCounter(result.getMemento().getRawOperationsStream()
-                            .map(OperationWithKey::getMino)
-                            .map(Mino::getBlock));
+                            .map(OperationWithKey::getBlock));
                     return isWith7BagSystem(squareHeight, blockCounter);
                 })
                 .collect(Collectors.groupingBy(result -> new BlockCounter(result.getMemento().getRawOperationsStream()
-                        .map(OperationWithKey::getMino)
-                        .map(Mino::getBlock))));
+                        .map(OperationWithKey::getBlock))));
 
         ColorConverter colorConverter = new ColorConverter();
         MinoRotation minoRotation = new MinoRotation();
@@ -202,7 +201,9 @@ public class SquaresMain {
 
                 for (int index = 0; index < values.size(); index++) {
                     Result result = values.get(index);
-                    List<OperationWithKey> operationWithKeys = result.getMemento().getOperationsStream(width).collect(Collectors.toList());
+                    List<MinoOperationWithKey> operationWithKeys = result.getMemento().getSeparableMinoStream(width)
+                            .map(SeparableMino::toMinoOperationWithKey)
+                            .collect(Collectors.toList());
 
                     // パターンを表す名前 を生成
                     // BlockField を生成
@@ -223,7 +224,7 @@ public class SquaresMain {
 
                     // テト譜の生成 (for operations)
                     BuildUpStream buildUpStream = new BuildUpStream(reachable, squareHeight);
-                    Optional<List<OperationWithKey>> first = buildUpStream.existsValidBuildPattern(field, operationWithKeys).findFirst();
+                    Optional<List<MinoOperationWithKey>> first = buildUpStream.existsValidBuildPattern(field, operationWithKeys).findFirst();
 
                     assert first.isPresent();
 

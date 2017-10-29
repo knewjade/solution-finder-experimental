@@ -1,10 +1,10 @@
 package _experimental.square4x10;
 
 import common.datastore.BlockCounter;
+import common.datastore.MinoOperationWithKey;
 import common.datastore.OperationWithKey;
 import common.parser.OperationWithKeyInterpreter;
 import core.mino.Block;
-import core.mino.Mino;
 import core.mino.MinoFactory;
 
 import java.io.BufferedWriter;
@@ -32,13 +32,12 @@ public class SquareFigureStep3 {
         // 出力
         Files.lines(Paths.get(inputPath))
                 .forEach(line -> {
-                    Stream<OperationWithKey> operationWithKeyStream = OperationWithKeyInterpreter.parseToStream(line, minoFactory);
+                    Stream<MinoOperationWithKey> operationWithKeyStream = OperationWithKeyInterpreter.parseToStream(line, minoFactory);
 
                     // BlockCounterに変換
                     BlockCounter blockCounter = new BlockCounter(
                             operationWithKeyStream
-                                    .map(OperationWithKey::getMino)
-                                    .map(Mino::getBlock)
+                                    .map(OperationWithKey::getBlock)
                     );
 
                     // BlockCounter -> Name

@@ -37,7 +37,7 @@ public class PutterMain3 {
         BlockCounter allBlocks = new BlockCounter(Block.valueList());
         for (Result result : results) {
             List<OperationWithKey> operationsList = result.getMemento().getOperationsStream(width).collect(Collectors.toList());
-            BlockCounter blockCounter = new BlockCounter(operationsList.stream().map(OperationWithKey::getMino).map(Mino::getBlock));
+            BlockCounter blockCounter = new BlockCounter(operationsList.stream().map(OperationWithKey::getBlock));
             if (allBlocks.containsAll(blockCounter)) {
                 String encode = easyTetfu.encode(emptyField, operationsList, height);
                 System.out.println(blockCounter.getBlocks());

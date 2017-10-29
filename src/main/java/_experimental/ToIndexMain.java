@@ -1,6 +1,6 @@
 package _experimental;
 
-import common.datastore.OperationWithKey;
+import common.datastore.MinoOperationWithKey;
 import common.parser.OperationWithKeyInterpreter;
 import core.field.Field;
 import core.field.FieldFactory;
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -114,9 +113,9 @@ public class ToIndexMain {
                         // 左端のミノから順に探索する
                         operationWithKeys.sort(Comparator.comparingInt(o -> o.getX() + o.getMino().getMinX()));
 
-                        OperationWithKey first = operationWithKeys.get(0);
+                        MinoOperationWithKey first = operationWithKeys.get(0);
                         int maxX = first.getX() + first.getMino().getMaxX();
-                        for (OperationWithKey operationWithKey : operationWithKeys.subList(1, operationWithKeys.size())) {
+                        for (MinoOperationWithKey operationWithKey : operationWithKeys.subList(1, operationWithKeys.size())) {
                             int min = operationWithKey.getX() + operationWithKey.getMino().getMinX();
                             if (maxX < min)
                                 return false;  // これまでの塊と独立して始まる  // 分割可能

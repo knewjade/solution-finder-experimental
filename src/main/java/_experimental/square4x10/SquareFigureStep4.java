@@ -2,6 +2,7 @@ package _experimental.square4x10;
 
 import common.comparator.OperationWithKeyComparator;
 import common.datastore.BlockCounter;
+import common.datastore.MinoOperationWithKey;
 import common.datastore.OperationWithKey;
 import common.datastore.Pair;
 import common.parser.OperationWithKeyInterpreter;
@@ -51,7 +52,7 @@ public class SquareFigureStep4 {
     private static final boolean IS_INDEX_NAME = true;  // 出力ファイル名をインデックスにする
     private static final boolean IS_EMPTY_RUN = false;  // 出力ファイルを空にする
 
-    private static final ListComparator<OperationWithKey> OPERATION_WITH_KEY_LIST_COMPARATOR = new ListComparator<>(new OperationWithKeyComparator());
+    private static final ListComparator<MinoOperationWithKey> OPERATION_WITH_KEY_LIST_COMPARATOR = new ListComparator<>(new OperationWithKeyComparator<>());
 
     private static final List<Color> COLORS = Arrays.asList(
             new Color(0xEDFBFF),
@@ -115,14 +116,13 @@ public class SquareFigureStep4 {
         MinoFactory minoFactory = new MinoFactory();
 
         // パターンを使用ミノ別に分類する
-        Map<BlockCounter, List<List<OperationWithKey>>> eachBlockCounter = Files.lines(patternFile.path)
-                .map(s -> OperationWithKeyInterpreter.parseToStream(s, minoFactory))
-                .map(stream -> stream.collect(Collectors.toList()))
-                .collect(Collectors.groupingBy(o -> new BlockCounter(o.stream().map(OperationWithKey::getMino).map(Mino::getBlock))));
+        Map<BlockCounter, List<List<MinoOperationWithKey>>> eachBlockCounter = Files.lines(patternFile.path)
+                .map(s -> OperationWithKeyInterpreter.parseToList(s, minoFactory))
+                .collect(Collectors.groupingBy(o -> new BlockCounter(o.stream().map(OperationWithKey::getBlock))));
 
         // パターン数に変換する
         ArrayList<Pair<BlockCounter, Integer>> counters = new ArrayList<>();
-        for (Map.Entry<BlockCounter, List<List<OperationWithKey>>> entry : eachBlockCounter.entrySet()) {
+        for (Map.Entry<BlockCounter, List<List<MinoOperationWithKey>>> entry : eachBlockCounter.entrySet()) {
             Pair<BlockCounter, Integer> pair = new Pair<>(entry.getKey(), entry.getValue().size());
             counters.add(pair);
         }
@@ -268,12 +268,12 @@ public class SquareFigureStep4 {
         return count;
     }
 
-    private static void main3(PatternFile patternFile, FixSquare fixSquare, List<List<OperationWithKey>> lists, EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap) throws IOException {
+    private static void main3(PatternFile patternFile, FixSquare fixSquare, List<List<MinoOperationWithKey>> lists, EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap) throws IOException {
         if (!IS_EMPTY_RUN) {
             // 全ての操作を並び替える
-            for (List<OperationWithKey> list : lists) {
+            for (List<MinoOperationWithKey> list : lists) {
                 list.sort((o1, o2) -> {
-                    int compareBlock = o1.getMino().getBlock().compareTo(o2.getMino().getBlock());
+                    int compareBlock = o1.getBlock().compareTo(o2.getBlock());
                     if (compareBlock != 0)
                         return compareBlock;
 
@@ -311,7 +311,7 @@ public class SquareFigureStep4 {
         }
     }
 
-    private static void main3(String path, FixSquare fixSquare, List<List<OperationWithKey>> lists, int xIndex, int yIndex, EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap, Color background) throws IOException {
+    private static void main3(String path, FixSquare fixSquare, List<List<MinoOperationWithKey>> lists, int xIndex, int yIndex, EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap, Color background) throws IOException {
 //        System.out.printf("generate: %s (%d, %d)%n", fixSquare, xIndex, yIndex);
 
         // リストの準備
@@ -361,15 +361,15 @@ public class SquareFigureStep4 {
                     if (lists.size() <= fieldIndex)
                         continue;
 
-                    List<OperationWithKey> sample = lists.get(fieldIndex);
+                    List<MinoOperationWithKey> sample = lists.get(fieldIndex);
 
                     // フィールドを黒で塗る 線の色
                     blackColorTasks.add(new TaskData(left, top));
 
                     // 色を決定する
                     EnumMap<Block, Prev> prev = new EnumMap<>(Block.class);
-                    for (OperationWithKey operationWithKey : sample) {
-                        Block block = operationWithKey.getMino().getBlock();
+                    for (MinoOperationWithKey operationWithKey : sample) {
+                        Block block = operationWithKey.getBlock();
                         Mino mino = operationWithKey.getMino();
                         List<Delta> deltas = minoMap.get(mino.getBlock()).get(mino.getRotate()).get(operationWithKey.getY()).get(operationWithKey.getNeedDeletedKey());
 //                        System.out.println(block);

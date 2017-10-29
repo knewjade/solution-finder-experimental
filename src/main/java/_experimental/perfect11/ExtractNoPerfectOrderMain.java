@@ -1,7 +1,7 @@
 package _experimental.perfect11;
 
 import common.buildup.BuildUp;
-import common.datastore.OperationWithKey;
+import common.datastore.MinoOperationWithKey;
 import common.datastore.blocks.Blocks;
 import common.datastore.blocks.LongBlocks;
 import common.order.OrderLookup;
@@ -35,7 +35,7 @@ public class ExtractNoPerfectOrderMain {
                 .peek(System.out::println)
                 .flatMap(name -> {
                     Path perfectPath = Paths.get(String.format("output/perfect10each/%s.csv", name));
-                    List<List<OperationWithKey>> perfects = loadPerfects(perfectPath);
+                    List<List<MinoOperationWithKey>> perfects = loadPerfects(perfectPath);
 
                     Path orderPath = Paths.get(String.format("output/order10each/%s.csv", name));
 
@@ -78,7 +78,7 @@ public class ExtractNoPerfectOrderMain {
         }
     }
 
-    private static List<List<OperationWithKey>> loadPerfects(Path perfectPath) {
+    private static List<List<MinoOperationWithKey>> loadPerfects(Path perfectPath) {
         MinoFactory minoFactory = new MinoFactory();
         try {
             return Files.lines(perfectPath, Charset.forName("UTF-8"))
