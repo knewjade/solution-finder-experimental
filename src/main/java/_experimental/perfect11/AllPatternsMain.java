@@ -1,7 +1,7 @@
 package _experimental.perfect11;
 
 import common.SyntaxException;
-import common.datastore.pieces.Blocks;
+import common.datastore.blocks.Blocks;
 import common.pattern.BlocksGenerator;
 import common.pattern.IBlocksGenerator;
 import core.mino.Block;

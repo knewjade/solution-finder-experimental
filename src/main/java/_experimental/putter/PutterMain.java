@@ -5,7 +5,7 @@ import common.datastore.BlockCounter;
 import common.datastore.Pair;
 import common.datastore.action.Action;
 import common.datastore.order.Order;
-import common.datastore.pieces.Blocks;
+import common.datastore.blocks.Blocks;
 import common.iterable.PermutationIterable;
 import common.pattern.BlocksGenerator;
 import common.pattern.IBlocksGenerator;

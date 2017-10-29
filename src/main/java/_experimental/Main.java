@@ -3,7 +3,7 @@ package _experimental;
 import common.SyntaxException;
 import common.comparator.PiecesNameComparator;
 import common.datastore.action.Action;
-import common.datastore.pieces.Blocks;
+import common.datastore.blocks.Blocks;
 import common.pattern.BlocksGenerator;
 import common.pattern.IBlocksGenerator;
 import concurrent.LockedCandidateThreadLocal;

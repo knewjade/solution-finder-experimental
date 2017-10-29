@@ -4,7 +4,7 @@ import common.SyntaxException;
 import helper.EasyPath;
 import helper.EasyPool;
 import common.datastore.BlockCounter;
-import common.datastore.pieces.LongBlocks;
+import common.datastore.blocks.LongBlocks;
 import common.order.ForwardOrderLookUp;
 import common.pattern.BlocksGenerator;
 import common.tree.AnalyzeTree;

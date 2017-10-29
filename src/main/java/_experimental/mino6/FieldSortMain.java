@@ -3,7 +3,7 @@ package _experimental.mino6;
 import common.SyntaxException;
 import common.datastore.Pair;
 import common.datastore.action.Action;
-import common.datastore.pieces.Blocks;
+import common.datastore.blocks.Blocks;
 import common.pattern.BlocksGenerator;
 import common.pattern.IBlocksGenerator;
 import common.tetfu.Tetfu;

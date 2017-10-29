@@ -4,7 +4,7 @@ import common.SyntaxException;
 import common.comparator.OperationWithKeyComparator;
 import common.datastore.BlockCounter;
 import common.datastore.OperationWithKey;
-import common.datastore.pieces.Blocks;
+import common.datastore.blocks.Blocks;
 import common.iterable.CombinationIterable;
 import common.parser.OperationWithKeyInterpreter;
 import common.pattern.BlocksGenerator;

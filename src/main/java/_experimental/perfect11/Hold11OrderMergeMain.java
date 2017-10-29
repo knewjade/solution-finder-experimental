@@ -1,7 +1,7 @@
 package _experimental.perfect11;
 
-import common.datastore.pieces.LongBlocks;
-import common.datastore.pieces.Blocks;
+import common.datastore.blocks.LongBlocks;
+import common.datastore.blocks.Blocks;
 import common.parser.BlockInterpreter;
 import core.mino.Block;
 
