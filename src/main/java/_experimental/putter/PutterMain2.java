@@ -4,10 +4,10 @@ import common.SyntaxException;
 import common.datastore.Pair;
 import common.datastore.Result;
 import common.datastore.action.Action;
+import common.datastore.blocks.Pieces;
 import common.datastore.order.Order;
-import common.datastore.blocks.Blocks;
-import common.pattern.BlocksGenerator;
-import common.pattern.IBlocksGenerator;
+import common.pattern.LoadedPatternGenerator;
+import common.pattern.PatternGenerator;
 import common.tree.AnalyzeTree;
 import concurrent.LockedCandidateThreadLocal;
 import concurrent.checker.CheckerUsingHoldThreadLocal;
@@ -16,7 +16,7 @@ import core.action.candidate.LockedCandidate;
 import core.field.Field;
 import core.field.FieldFactory;
 import core.field.FieldView;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.Mino;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
@@ -63,9 +63,9 @@ public class PutterMain2 {
         );
         int maxClearLine = 4;
 
-        // Block generator
+        // Piece generator
         Field initField = FieldFactory.createField("");
-        IBlocksGenerator setupGenerator = new BlocksGenerator(setupPattern);
+        PatternGenerator setupGenerator = new LoadedPatternGenerator(setupPattern);
         int setupMaxDepth = setupGenerator.getDepth();
         int emptyDepth = 10 - ((initField.getNumOfAllBlocks() / 4) + setupMaxDepth);  // 10 - (field + setupPattern)
         SetupValidator validator = new SetupValidator(4 * emptyDepth);
@@ -77,30 +77,30 @@ public class PutterMain2 {
         int core = Runtime.getRuntime().availableProcessors();
         ExecutorService executorService = Executors.newFixedThreadPool(core);
 
-        BlocksGenerator generator = new BlocksGenerator(setupPattern);
+        LoadedPatternGenerator generator = new LoadedPatternGenerator(setupPattern);
         List<Pair<String, Set<Field>>> collect = generator.blockCountersStream().parallel()
-                .map(blockCounter -> blockCounter.getBlockStream().map(Block::getName).collect(Collectors.joining()))
+                .map(blockCounter -> blockCounter.getBlockStream().map(Piece::getName).collect(Collectors.joining()))
                 .map(names -> String.format("[%s]!", names))
                 .map(s -> {
                     System.out.println(s);
-                    BlocksGenerator blocksGenerator = null;
+                    LoadedPatternGenerator patternGenerator = null;
                     try {
-                        blocksGenerator = new BlocksGenerator(s);
+                        patternGenerator = new LoadedPatternGenerator(s);
                     } catch (SyntaxException e) {
                         e.printStackTrace();
                     }
-                    return new Pair<>(s, blocksGenerator.blocksStream().parallel()
+                    return new Pair<>(s, patternGenerator.blocksStream().parallel()
                             .flatMap(blocks -> {
                                 LockedCandidate candidate = new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine);
                                 CheckmateNoHold<Action> checkmateNoHold = new CheckmateNoHold<>(minoFactory, validator);
-                                List<Result> search = checkmateNoHold.search(initField, blocks.getBlocks(), candidate, maxClearLine, setupMaxDepth);
+                                List<Result> search = checkmateNoHold.search(initField, blocks.getPieces(), candidate, maxClearLine, setupMaxDepth);
                                 return search.stream()
                                         .map(result -> {
                                             Order order = result.getOrder();
                                             int lastMaxClearLine = result.getOrder().getMaxClearLine();
                                             Field field = order.getField().freeze(lastMaxClearLine);
                                             Action action = result.getLastAction();
-                                            Mino mino = minoFactory.create(result.getLastBlock(), action.getRotate());
+                                            Mino mino = minoFactory.create(result.getLastPiece(), action.getRotate());
                                             field.put(mino, action.getX(), action.getY());
                                             return field;
                                         });
@@ -130,8 +130,8 @@ public class PutterMain2 {
         LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(maxClearLine);
         CheckerUsingHoldThreadLocal<Action> checkerThreadLocal = new CheckerUsingHoldThreadLocal<>();
         ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, candidateThreadLocal, checkerThreadLocal);
-        IBlocksGenerator verifyGenerator = new BlocksGenerator("*!");
-        List<Blocks> searchingBlocks = verifyGenerator.blocksStream().collect(Collectors.toList());
+        PatternGenerator verifyGenerator = new LoadedPatternGenerator("*!");
+        List<Pieces> searchingBlocks = verifyGenerator.blocksStream().collect(Collectors.toList());
 
         for (Pair<Field, Integer> pair : results) {
             if (pair.getValue() <= 1)
@@ -139,9 +139,9 @@ public class PutterMain2 {
 
             Field field = pair.getKey();
             int verifyMaxClearLine = (field.getNumOfAllBlocks() + emptyDepth * 4) / 10;
-            List<Pair<Blocks, Boolean>> search = invoker.search(field, searchingBlocks, verifyMaxClearLine, emptyDepth);
+            List<Pair<Pieces, Boolean>> search = invoker.search(field, searchingBlocks, verifyMaxClearLine, emptyDepth);
             AnalyzeTree tree = new AnalyzeTree();
-            for (Pair<Blocks, Boolean> pair2 : search) {
+            for (Pair<Pieces, Boolean> pair2 : search) {
                 tree.set(pair2.getValue(), pair2.getKey());
             }
             double successPercent = tree.getSuccessPercent() * 100;
@@ -162,14 +162,14 @@ public class PutterMain2 {
                 .flatMap(blocks -> {
                     LockedCandidate candidate = new LockedCandidate(minoFactory, minoShifter, minoRotation, maxClearLine);
                     CheckmateNoHold<Action> checkmateNoHold = new CheckmateNoHold<>(minoFactory, validator);
-                    List<Result> search = checkmateNoHold.search(initField, blocks.getBlocks(), candidate, maxClearLine, setupMaxDepth);
+                    List<Result> search = checkmateNoHold.search(initField, blocks.getPieces(), candidate, maxClearLine, setupMaxDepth);
                     return search.stream()
                             .map(result -> {
                                 Order order = result.getOrder();
                                 int lastMaxClearLine = result.getOrder().getMaxClearLine();
                                 Field field = order.getField().freeze(lastMaxClearLine);
                                 Action action = result.getLastAction();
-                                Mino mino = minoFactory.create(result.getLastBlock(), action.getRotate());
+                                Mino mino = minoFactory.create(result.getLastPiece(), action.getRotate());
                                 field.put(mino, action.getX(), action.getY());
                                 return field;
                             });
@@ -186,9 +186,9 @@ public class PutterMain2 {
                 .map(field -> {
                     try {
                         int verifyMaxClearLine = (field.getNumOfAllBlocks() + emptyDepth * 4) / 10;
-                        List<Pair<Blocks, Boolean>> search = invoker.search(field, searchingBlocks, verifyMaxClearLine, emptyDepth);
+                        List<Pair<Pieces, Boolean>> search = invoker.search(field, searchingBlocks, verifyMaxClearLine, emptyDepth);
                         AnalyzeTree tree = new AnalyzeTree();
-                        for (Pair<Blocks, Boolean> pair : search) {
+                        for (Pair<Pieces, Boolean> pair : search) {
                             tree.set(pair.getValue(), pair.getKey());
                         }
                         double successPercent = tree.getSuccessPercent() * 100;

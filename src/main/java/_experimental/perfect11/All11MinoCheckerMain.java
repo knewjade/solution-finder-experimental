@@ -1,10 +1,10 @@
 package _experimental.perfect11;
 
-import common.datastore.BlockCounter;
-import common.datastore.blocks.LongBlocks;
+import common.datastore.PieceCounter;
+import common.datastore.blocks.LongPieces;
 import common.order.ForwardOrderLookUp;
 import common.parser.BlockInterpreter;
-import core.mino.Block;
+import core.mino.Piece;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,16 +22,16 @@ public class All11MinoCheckerMain {
 
         // パフェできない組みあわせ
         Path allNGOrders = Paths.get("output/combAllNG.csv");
-        HashSet<BlockCounter> blockCounters = Files.lines(allNGOrders)
+        HashSet<PieceCounter> pieceCounters = Files.lines(allNGOrders)
                 .map(BlockInterpreter::parse10)
-                .map(BlockCounter::new)
+                .map(PieceCounter::new)
                 .collect(Collectors.toCollection(HashSet::new));
 
         // パフェできない順序
         Path includeNGOrder = Paths.get("output/orderNG.csv");
-        Set<LongBlocks> ngPieces = Files.lines(includeNGOrder)
+        Set<LongPieces> ngPieces = Files.lines(includeNGOrder)
                 .map(BlockInterpreter::parse10)
-                .map(LongBlocks::new)
+                .map(LongPieces::new)
                 .collect(Collectors.toSet());
 
         //
@@ -48,21 +48,21 @@ public class All11MinoCheckerMain {
                     // パフェできないものは true で次に送る
 
                     // パフェできない組み合わせである
-                    BlockCounter blockCounter = new BlockCounter(BlockInterpreter.parse10(line));
-                    if (blockCounters.contains(blockCounter))
+                    PieceCounter pieceCounter = new PieceCounter(BlockInterpreter.parse10(line));
+                    if (pieceCounters.contains(pieceCounter))
                         return true;
 
                     // パフェできない順序である
-                    LongBlocks pieces = new LongBlocks(BlockInterpreter.parse10(line));
+                    LongPieces pieces = new LongPieces(BlockInterpreter.parse10(line));
                     return ngPieces.contains(pieces);
                 })
                 .filter(line -> {
-                    List<Block> blocks = BlockInterpreter.parse11(line).collect(Collectors.toList());
+                    List<Piece> blocks = BlockInterpreter.parse11(line).collect(Collectors.toList());
                     ForwardOrderLookUp orderLookUp = new ForwardOrderLookUp(10, true);
 
                     // すべてのパターンでパフェできないものは true で次に送る
                     return orderLookUp.parse(blocks)
-                            .map(LongBlocks::new)
+                            .map(LongPieces::new)
                             .allMatch(pieces -> {
                                 // パフェできないものは true で次に送る
 
@@ -71,8 +71,8 @@ public class All11MinoCheckerMain {
                                     return true;
 
                                 // パフェできない組み合わせである
-                                BlockCounter blockCounter = new BlockCounter(pieces.blockStream());
-                                return blockCounters.contains(blockCounter);
+                                PieceCounter pieceCounter = new PieceCounter(pieces.blockStream());
+                                return pieceCounters.contains(pieceCounter);
                             });
 
                 })

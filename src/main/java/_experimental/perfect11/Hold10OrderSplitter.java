@@ -1,8 +1,8 @@
 package _experimental.perfect11;
 
-import common.datastore.BlockCounter;
+import common.datastore.PieceCounter;
 import common.parser.BlockInterpreter;
-import core.mino.Block;
+import core.mino.Piece;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -22,12 +22,12 @@ public class Hold10OrderSplitter {
                 .sequential()
                 .forEach(s -> {
                     // BlockCounterに変換
-                    Stream<Block> stream = BlockInterpreter.parse10(s);
-                    BlockCounter counter = new BlockCounter(stream);
+                    Stream<Piece> stream = BlockInterpreter.parse10(s);
+                    PieceCounter counter = new PieceCounter(stream);
 
                     // 使用ミノ文字列に変換
                     String using = counter.getBlocks().stream()
-                            .map(Block::getName)
+                            .map(Piece::getName)
                             .collect(Collectors.joining());
 
                     // 書き出し

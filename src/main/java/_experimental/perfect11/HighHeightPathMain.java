@@ -13,7 +13,7 @@ import core.column_field.ColumnSmallField;
 import core.field.Field;
 import core.field.FieldFactory;
 import core.field.FieldView;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.Rotate;
@@ -107,14 +107,14 @@ public class HighHeightPathMain {
 //                                StringBuilder blocks = new StringBuilder();
 //                                operationWithKeyStream
 //                                        .sequential()
-//                                        .sorted(Comparator.comparing(o -> o.getMino().getBlock()))
+//                                        .sorted(Comparator.comparing(o -> o.getMino().getPiece()))
 //                                        .forEach(key -> {
 //                                            Field test = FieldFactory.createField(height);
 //                                            Mino mino = key.getMino();
 //                                            test.putMino(mino, key.getX(), key.getY());
 //                                            test.insertWhiteLineWithKey(key.getNeedDeletedKey());
-//                                            blockField.merge(test, mino.getBlock());
-//                                            blocks.append(key.getMino().getBlock());
+//                                            blockField.merge(test, mino.getPiece());
+//                                            blocks.append(key.getMino().getPiece());
 //                                        });
 //                                return parseBlockFieldToTetfuElement(field, colorConverter, blockField, blocks.toString());
 //                            })
@@ -158,9 +158,9 @@ public class HighHeightPathMain {
         ColoredField coloredField = ColoredFieldFactory.createField(24);
         fillInField(coloredField, ColorType.Gray, initField);
 
-        for (Block block : Block.values()) {
-            Field target = blockField.get(block);
-            ColorType colorType = colorConverter.parseToColorType(block);
+        for (Piece piece : Piece.values()) {
+            Field target = blockField.get(piece);
+            ColorType colorType = colorConverter.parseToColorType(piece);
             fillInField(coloredField, colorType, target);
         }
 

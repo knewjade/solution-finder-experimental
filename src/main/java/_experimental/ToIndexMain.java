@@ -148,7 +148,7 @@ public class ToIndexMain {
         }
 
         int index = minos.toIndex(mino);
-        String name = operationWithKey.getBlock().getName();
+        String name = operationWithKey.getPiece().getName();
         String rotate = getRotate(operationWithKey.getRotate());
         int x = operationWithKey.getX();
         int lowerY = mino.getLowerY();

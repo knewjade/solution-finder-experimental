@@ -1,8 +1,8 @@
 package _experimental.main;
 
-import common.datastore.BlockCounter;
+import common.datastore.PieceCounter;
 import common.parser.BlockInterpreter;
-import core.mino.Block;
+import core.mino.Piece;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,12 +17,12 @@ public class VerifyAll11MinoFilteringMain {
     public static void main(String[] args) throws IOException {
         long count = Files.lines(Paths.get("output/11sequences_usehold.csv"))
                 .filter(line -> {
-                    Stream<Block> blockStream = BlockInterpreter.parse11(line);
+                    Stream<Piece> blockStream = BlockInterpreter.parse11(line);
                     // BlockCounterに変換
-                    BlockCounter blockCounter = new BlockCounter(blockStream);
+                    PieceCounter pieceCounter = new PieceCounter(blockStream);
 
                     // ミノの個数（最も多い・2番めに多い）を取得
-                    EnumMap<Block, Integer> map = blockCounter.getEnumMap();
+                    EnumMap<Piece, Integer> map = pieceCounter.getEnumMap();
                     List<Integer> values = new ArrayList<>(map.values());
                     values.add(0);  // ミノが2種類以下の場合はこの0を取得する
                     values.add(0);

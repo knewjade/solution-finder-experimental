@@ -2,16 +2,16 @@ package _experimental;
 
 import common.comparator.FieldComparator;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 
 public class SequenceElement implements PrioritizedElement, Comparable<SequenceElement> {
     private final Field field;
-    private final Block hold;
+    private final Piece hold;
     private final int maxClearLine;
     private final int depth;
     private final int priority;
 
-    public SequenceElement(Field field, Block hold, int maxClearLine, int depth) {
+    public SequenceElement(Field field, Piece hold, int maxClearLine, int depth) {
         this.field = field;
         this.hold = hold;
         this.maxClearLine = maxClearLine;
@@ -32,7 +32,7 @@ public class SequenceElement implements PrioritizedElement, Comparable<SequenceE
         return field;
     }
 
-    public Block getHold() {
+    public Piece getHold() {
         return hold;
     }
 

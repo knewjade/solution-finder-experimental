@@ -3,7 +3,7 @@ package _experimental.unused;
 import core.action.candidate.Candidate;
 import core.action.candidate.LockedCandidate;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.MinoRotation;
@@ -58,11 +58,11 @@ public class CheckmateInvoker {
         this.stopwatch = stopwatch;
     }
 
-    public void measure(Field field, List<Block> blocks, int maxCount) {
-        measure(field, blocks, maxCount, true);
+    public void measure(Field field, List<Piece> pieces, int maxCount) {
+        measure(field, pieces, maxCount, true);
     }
 
-    public void measure(Field field, List<Block> blocks, int maxCount, boolean parameterCheck) {
+    public void measure(Field field, List<Piece> pieces, int maxCount, boolean parameterCheck) {
         // 残りのスペースが4の倍数でないときはエラー
         int emptyCount = maxClearLine * 10 - field.getNumOfAllBlocks();
         if (parameterCheck && emptyCount % 4 != 0)
@@ -70,13 +70,13 @@ public class CheckmateInvoker {
 
         // ブロック数が足りないときはエラー
         int maxDepth = emptyCount / 4;
-        if (parameterCheck && blocks.size() < maxDepth)
-            throw new IllegalArgumentException("Error: blocks size check short: " + blocks.size());
+        if (parameterCheck && pieces.size() < maxDepth)
+            throw new IllegalArgumentException("Error: pieces size check short: " + pieces.size());
 
         // 計測
         for (int count = 0; count < maxCount; count++) {
             stopwatch.start();
-            lastResults = checkmate.search(field, blocks, candidate, maxClearLine, maxDepth);
+            lastResults = checkmate.search(field, pieces, candidate, maxClearLine, maxDepth);
             stopwatch.stop();
         }
     }

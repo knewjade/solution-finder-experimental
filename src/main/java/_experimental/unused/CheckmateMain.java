@@ -1,13 +1,13 @@
 package _experimental.unused;
 
-import core.mino.Block;
+import core.mino.Piece;
 import core.field.Field;
 import core.field.FieldFactory;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static core.mino.Block.*;
+import static core.mino.Piece.*;
 
 public class CheckmateMain {
     public static void main(String[] args) throws Exception {
@@ -17,7 +17,7 @@ public class CheckmateMain {
 
     private static void pattern1() {
         // Invoker
-        List<Block> blocks = Arrays.asList(Block.I, Block.I, Block.J, Block.S);
+        List<Piece> pieces = Arrays.asList(Piece.I, Piece.I, Piece.J, Piece.S);
         int maxClearLine = 4;
         CheckmateInvoker invoker = CheckmateInvoker.createPerfectCheckmateUsingHold(maxClearLine);
 
@@ -31,16 +31,16 @@ public class CheckmateMain {
         Field field = FieldFactory.createField(marks);
 
         // Measure
-        invoker.measure(field, blocks, 5000);
+        invoker.measure(field, pieces, 5000);
         invoker.clearStopwatch();
 
-        invoker.measure(field, blocks, 20000);
+        invoker.measure(field, pieces, 20000);
         invoker.show(true);
     }
 
     private static void pattern2() {
         // Invoker
-        List<Block> blocks = Arrays.asList(I, T, L, J, S, Z, J, L, T);
+        List<Piece> pieces = Arrays.asList(I, T, L, J, S, Z, J, L, T);
         int maxClearLine = 8;
         CheckmateInvoker invoker = CheckmateInvoker.createPerfectCheckmateUsingHold(maxClearLine);
 
@@ -58,13 +58,13 @@ public class CheckmateMain {
         Field field = FieldFactory.createField(marks);
 
         // Measure
-        invoker.measure(field, blocks, 500);
+        invoker.measure(field, pieces, 500);
         invoker.show(false);
         invoker.clearStopwatch();
 
         System.out.println("---");
 
-        invoker.measure(field, blocks, 2000);
+        invoker.measure(field, pieces, 2000);
         invoker.show(true);
     }
 }

@@ -9,7 +9,7 @@ import core.action.candidate.Candidate;
 import core.action.candidate.HarddropCandidate;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.Rotate;
@@ -53,19 +53,19 @@ public class MinoBuildingMain {
         HashSet<Field> fieldSet = new HashSet<>();
 
         // すべてのブロックの組み合わせを生成
-        List<Block> allBlocks = Arrays.asList(Block.O, Block.Z, Block.I, Block.T, Block.S, Block.J);
-        PermutationIterable<Block> permutationIterable = new PermutationIterable<>(allBlocks, allBlocks.size());
+        List<Piece> allPieces = Arrays.asList(Piece.O, Piece.Z, Piece.I, Piece.T, Piece.S, Piece.J);
+        PermutationIterable<Piece> permutationIterable = new PermutationIterable<>(allPieces, allPieces.size());
 
         // 探索
         int counter = 0;
-        for (List<Block> blocks : permutationIterable) {
+        for (List<Piece> pieces : permutationIterable) {
             System.out.println("counter = " + counter);
             counter++;
 
-            assert maxDepth == blocks.size();
+            assert maxDepth == pieces.size();
 
             // 地形を探索
-            List<Result> results = checkmate.search(field, blocks, candidate, maxClearLine, blocks.size());
+            List<Result> results = checkmate.search(field, pieces, candidate, maxClearLine, pieces.size());
 
             // 操作からfieldに変換
             List<Field> operationsList = results.stream()
@@ -73,9 +73,9 @@ public class MinoBuildingMain {
                         Field field1 = FieldFactory.createField(maxClearLine);
                         List<Operation> operations = ResultHelper.createOperationStream(result).collect(Collectors.toList());
                         for (Operation operation : operations) {
-                            Block block = operation.getBlock();
+                            Piece piece = operation.getPiece();
                             Rotate rotate = operation.getRotate();
-                            field1.put(minoFactory.create(block, rotate), operation.getX(), operation.getY());
+                            field1.put(minoFactory.create(piece, rotate), operation.getX(), operation.getY());
                         }
                         return field1;
                     })

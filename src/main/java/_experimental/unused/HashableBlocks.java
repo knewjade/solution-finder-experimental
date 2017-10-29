@@ -1,33 +1,33 @@
 package _experimental.unused;
 
-import core.mino.Block;
+import core.mino.Piece;
 
 import java.util.List;
 
-// num of blocks <= 10 であること
+// num of pieces <= 10 であること
 // nullを含まないこと
 class HashableBlocks {
-    private final List<Block> blocks;
+    private final List<Piece> pieces;
 
     private final int hash;
 
-    public HashableBlocks(List<Block> blocks) {
-        this.blocks = blocks;
-        this.hash = calculateHash(blocks);
+    public HashableBlocks(List<Piece> pieces) {
+        this.pieces = pieces;
+        this.hash = calculateHash(pieces);
     }
 
-    private int calculateHash(List<Block> blocks) {
-        int size = blocks.size();
-        int number = blocks.get(size - 1).getNumber();
+    private int calculateHash(List<Piece> pieces) {
+        int size = pieces.size();
+        int number = pieces.get(size - 1).getNumber();
         for (int index = size - 2; 0 <= index; index--) {
             number *= 8;
-            number += blocks.get(index).getNumber();
+            number += pieces.get(index).getNumber();
         }
         return number;
     }
 
-    public List<Block> getBlocks() {
-        return blocks;
+    public List<Piece> getPieces() {
+        return pieces;
     }
 
     @Override

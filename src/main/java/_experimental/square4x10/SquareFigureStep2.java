@@ -1,6 +1,6 @@
 package _experimental.square4x10;
 
-import common.datastore.BlockCounter;
+import common.datastore.PieceCounter;
 import common.datastore.MinoOperationWithKey;
 import common.datastore.OperationWithKey;
 import common.parser.OperationWithKeyInterpreter;
@@ -34,12 +34,12 @@ public class SquareFigureStep2 {
                         Stream<MinoOperationWithKey> operationWithKeyStream = OperationWithKeyInterpreter.parseToStream(s, minoFactory);
 
                         // BlockCounterに変換
-                        BlockCounter blockCounter = new BlockCounter(
+                        PieceCounter pieceCounter = new PieceCounter(
                                 operationWithKeyStream
-                                        .map(OperationWithKey::getBlock)
+                                        .map(OperationWithKey::getPiece)
                         );
 
-                        return SevenBagFilter.isIn7Bag(blockCounter);
+                        return SevenBagFilter.isIn7Bag(pieceCounter);
                     })
                     .forEach(s -> {
                         executorService.submit(() -> {

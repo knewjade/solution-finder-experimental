@@ -18,7 +18,7 @@ import core.action.candidate.Candidate;
 import core.field.Field;
 import core.field.FieldFactory;
 import core.field.FieldView;
-import core.mino.Block;
+import core.mino.Piece;
 import lib.Stopwatch;
 import searcher.checker.Checker;
 
@@ -34,7 +34,7 @@ import java.util.concurrent.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static core.mino.Block.*;
+import static core.mino.Piece.*;
 
 public class Cart {
     public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
@@ -87,10 +87,10 @@ public class Cart {
         output();
         // ========================================
         output("# Initialize / User-defined");
-        List<Block> usingBlocks = Arrays.asList(I, S, Z, J, L, O, T);
+        List<Piece> usingPieces = Arrays.asList(I, S, Z, J, L, O, T);
 
         output("Max clear lines: " + maxClearLine);
-        output("Using pieces: " + usingBlocks);
+        output("Using pieces: " + usingPieces);
 
         output();
         // ========================================
@@ -109,8 +109,8 @@ public class Cart {
 
         // ブロック数が足りないときはエラー
         int maxDepth = emptyCount / 4;
-        if (usingBlocks.size() < maxDepth)
-            throw new IllegalArgumentException("Error: blocks size check short: " + usingBlocks.size() + " < " + maxDepth);
+        if (usingPieces.size() < maxDepth)
+            throw new IllegalArgumentException("Error: blocks size check short: " + usingPieces.size() + " < " + maxDepth);
 
         output();
         // ========================================
@@ -118,18 +118,18 @@ public class Cart {
 
         // 必要なミノ分（maxDepth + 1）だけを取り出す。maxDepth + 1だけないときはブロックの個数をそのまま指定
         int combinationPopCount = maxDepth + 1;
-        if (usingBlocks.size() < combinationPopCount)
-            combinationPopCount = usingBlocks.size();
+        if (usingPieces.size() < combinationPopCount)
+            combinationPopCount = usingPieces.size();
 
         output("Piece pop count = " + combinationPopCount);
 
-        List<List<Block>> searchingPieces = new ArrayList<>();
+        List<List<Piece>> searchingPieces = new ArrayList<>();
         // 組み合わせの列挙
-        Iterable<List<Block>> combinationIterable = new CombinationIterable<>(usingBlocks, combinationPopCount);
-        for (List<Block> combination : combinationIterable) {
+        Iterable<List<Piece>> combinationIterable = new CombinationIterable<>(usingPieces, combinationPopCount);
+        for (List<Piece> combination : combinationIterable) {
             // 組み合わせから、順列を列挙
-            Iterable<List<Block>> permutationIterable = new AllPermutationIterable<>(combination);
-            for (List<Block> permutation : permutationIterable) {
+            Iterable<List<Piece>> permutationIterable = new AllPermutationIterable<>(combination);
+            for (List<Piece> permutation : permutationIterable) {
                 searchingPieces.add(permutation);
             }
         }
@@ -143,9 +143,9 @@ public class Cart {
         ConcurrentVisitedTree visitedTree = new ConcurrentVisitedTree();
         Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
 
-        List<Future<Pair<List<Block>, Boolean>>> futureResults = new ArrayList<>();
-        for (List<Block> target : searchingPieces) {
-            Future<Pair<List<Block>, Boolean>> future = executorService.submit(() -> {
+        List<Future<Pair<List<Piece>, Boolean>>> futureResults = new ArrayList<>();
+        for (List<Piece> target : searchingPieces) {
+            Future<Pair<List<Piece>, Boolean>> future = executorService.submit(() -> {
                 int succeed = visitedTree.isSucceed(target);
                 if (succeed != VisitedTree.NO_RESULT)
                     return new Pair<>(target, succeed == VisitedTree.SUCCEED);
@@ -157,13 +157,13 @@ public class Cart {
 
                 if (checkResult) {
                     Result result = checker.getResult();
-                    List<Block> blocks = ResultHelper.createOperationStream(result)
-                            .map(Operation::getBlock)
+                    List<Piece> pieces = ResultHelper.createOperationStream(result)
+                            .map(Operation::getPiece)
                             .collect(Collectors.toList());
 
-                    int reverseMaxDepth = result.getLastHold() != null ? blocks.size() + 1 : blocks.size();
-                    ArrayList<StackOrder<Block>> reversePieces = OrderLookup.reverseBlocks(blocks, reverseMaxDepth);
-                    for (StackOrder<Block> piece : reversePieces) {
+                    int reverseMaxDepth = result.getLastHold() != null ? pieces.size() + 1 : pieces.size();
+                    ArrayList<StackOrder<Piece>> reversePieces = OrderLookup.reverseBlocks(pieces, reverseMaxDepth);
+                    for (StackOrder<Piece> piece : reversePieces) {
                         visitedTree.set(true, piece.toList());
                     }
                 }
@@ -175,11 +175,11 @@ public class Cart {
 
         // 結果を集計する
         AnalyzeTree analyzeTree = new AnalyzeTree();
-        for (Future<Pair<List<Block>, Boolean>> future : futureResults) {
-            Pair<List<Block>, Boolean> resultPair = future.get();
-            List<Block> blocks = resultPair.getKey();
+        for (Future<Pair<List<Piece>, Boolean>> future : futureResults) {
+            Pair<List<Piece>, Boolean> resultPair = future.get();
+            List<Piece> pieces = resultPair.getKey();
             Boolean result = resultPair.getValue();
-            analyzeTree.set(result, blocks);
+            analyzeTree.set(result, pieces);
         }
 
         stopwatch.stop();
@@ -191,8 +191,8 @@ public class Cart {
 
         //
         ArrayList<Pair<HashableBlocks, Boolean>> results = new ArrayList<>();
-        for (Future<Pair<List<Block>, Boolean>> future : futureResults) {
-            Pair<List<Block>, Boolean> pair = future.get();
+        for (Future<Pair<List<Piece>, Boolean>> future : futureResults) {
+            Pair<List<Piece>, Boolean> pair = future.get();
             HashableBlocks blocks = new HashableBlocks(pair.getKey());
             results.add(new Pair<>(blocks, pair.getValue()));
         }
@@ -232,8 +232,8 @@ public class Cart {
             for (int pattern = 1; pattern < 64; pattern++) {
                 final int finalIndex = index;
                 Split split = new Split(pattern);
-                List<Block> left = split.getLeft();
-                Predicate<HashableBlocks> question = (HashableBlocks blocks) -> left.contains(blocks.getBlocks().get(finalIndex));
+                List<Piece> left = split.getLeft();
+                Predicate<HashableBlocks> question = (HashableBlocks blocks) -> left.contains(blocks.getPieces().get(finalIndex));
                 double value = call(results, question);
                 if (value < minValue) {
                     minValue = value;
@@ -244,10 +244,10 @@ public class Cart {
         }
 
         Split maxSplit = new Split(maxPattern);
-        List<Block> maxLeft = maxSplit.getLeft().size() < maxSplit.getRight().size() ? maxSplit.getLeft() : maxSplit.getRight();
+        List<Piece> maxLeft = maxSplit.getLeft().size() < maxSplit.getRight().size() ? maxSplit.getLeft() : maxSplit.getRight();
         int maxFinalIndex = maxIndex;
 
-        Predicate<HashableBlocks> maxQuestion = (HashableBlocks blocks) -> maxLeft.contains(blocks.getBlocks().get(maxFinalIndex));
+        Predicate<HashableBlocks> maxQuestion = (HashableBlocks blocks) -> maxLeft.contains(blocks.getPieces().get(maxFinalIndex));
         ArrayList<Pair<HashableBlocks, Boolean>> nextTrue = new ArrayList<>();
         ArrayList<Pair<HashableBlocks, Boolean>> nextFalse = new ArrayList<>();
         for (Pair<HashableBlocks, Boolean> result : results) {
@@ -263,7 +263,7 @@ public class Cart {
                 System.out.print("  ");
             System.out.println("retire");
             checkLast(results, answers + "x");
-            results.forEach(pair -> System.out.println(pair.getKey().getBlocks() + " " + pair.getValue()));
+            results.forEach(pair -> System.out.println(pair.getKey().getPieces() + " " + pair.getValue()));
             return;
         }
 
@@ -421,25 +421,25 @@ public class Cart {
     }
 
     private static class Split {
-        private final List<Block> left = new ArrayList<>();
-        private final List<Block> right = new ArrayList<>();
+        private final List<Piece> left = new ArrayList<>();
+        private final List<Piece> right = new ArrayList<>();
 
         public Split(int v) {
             assert 0 < v && v < 64;
-            for (Block block : Block.values()) {
+            for (Piece piece : Piece.values()) {
                 if ((v & 1) == 0)
-                    left.add(block);
+                    left.add(piece);
                 else
-                    right.add(block);
+                    right.add(piece);
                 v >>>= 1;
             }
         }
 
-        public List<Block> getLeft() {
+        public List<Piece> getLeft() {
             return left;
         }
 
-        public List<Block> getRight() {
+        public List<Piece> getRight() {
             return right;
         }
     }

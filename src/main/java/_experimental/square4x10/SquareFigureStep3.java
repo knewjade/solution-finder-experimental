@@ -1,10 +1,10 @@
 package _experimental.square4x10;
 
-import common.datastore.BlockCounter;
+import common.datastore.PieceCounter;
 import common.datastore.MinoOperationWithKey;
 import common.datastore.OperationWithKey;
 import common.parser.OperationWithKeyInterpreter;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 
 import java.io.BufferedWriter;
@@ -35,16 +35,16 @@ public class SquareFigureStep3 {
                     Stream<MinoOperationWithKey> operationWithKeyStream = OperationWithKeyInterpreter.parseToStream(line, minoFactory);
 
                     // BlockCounterに変換
-                    BlockCounter blockCounter = new BlockCounter(
+                    PieceCounter pieceCounter = new PieceCounter(
                             operationWithKeyStream
-                                    .map(OperationWithKey::getBlock)
+                                    .map(OperationWithKey::getPiece)
                     );
 
-                    // BlockCounter -> Name
-                    String name = toName(blockCounter);
+                    // PieceCounter -> Name
+                    String name = toName(pieceCounter);
 
                     // 使用ミノ種類数
-                    int size = blockCounter.getEnumMap().keySet().size();
+                    int size = pieceCounter.getEnumMap().keySet().size();
 
                     // アウトプットファイル名
                     String key = String.format("%s/%d_%s", outputDirectory, size, name);
@@ -75,8 +75,8 @@ public class SquareFigureStep3 {
         }
     }
 
-    private static String toName(BlockCounter blockCounter) {
-        EnumMap<Block, Integer> map = blockCounter.getEnumMap();
+    private static String toName(PieceCounter pieceCounter) {
+        EnumMap<Piece, Integer> map = pieceCounter.getEnumMap();
         List<Integer> values = new ArrayList<>(map.values());
         values.sort(Comparator.reverseOrder());
 

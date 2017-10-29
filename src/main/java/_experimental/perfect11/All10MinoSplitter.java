@@ -1,9 +1,9 @@
 package _experimental.perfect11;
 
-import common.datastore.BlockCounter;
-import common.datastore.blocks.LongBlocks;
-import common.datastore.blocks.Blocks;
-import core.mino.Block;
+import common.datastore.PieceCounter;
+import common.datastore.blocks.LongPieces;
+import common.datastore.blocks.Pieces;
+import core.mino.Piece;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -24,20 +24,20 @@ public class All10MinoSplitter {
                 .forEach(s -> {
                     // Piecesに変換
                     String[] array = s.split(";");
-                    Blocks blocks = new LongBlocks();
+                    Pieces pieces = new LongPieces();
                     for (String operation : array) {
                         String[] split = operation.split(",");
-                        Block block = Block.valueOf(split[0]);
-                        blocks = blocks.addAndReturnNew(block);
+                        Piece piece = Piece.valueOf(split[0]);
+                        pieces = pieces.addAndReturnNew(piece);
                     }
 
                     // BlockCounterに変換
-                    Stream<Block> stream = blocks.blockStream();
-                    BlockCounter counter = new BlockCounter(stream);
+                    Stream<Piece> stream = pieces.blockStream();
+                    PieceCounter counter = new PieceCounter(stream);
 
                     // 使用ミノ文字列に変換
                     String using = counter.getBlocks().stream()
-                            .map(Block::getName)
+                            .map(Piece::getName)
                             .collect(Collectors.joining());
 
                     // 書き出し

@@ -1,11 +1,11 @@
 package _experimental.unused;
 
 import core.action.candidate.Candidate;
+import core.mino.Piece;
 import searcher.checker.Checker;
 import common.tree.AnalyzeTree;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Block;
 import lib.Stopwatch;
 import common.iterable.CombinationIterable;
 import common.iterable.AllPermutationIterable;
@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static core.mino.Block.*;
+import static core.mino.Piece.*;
 
 public class ConcurrentMain {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
@@ -34,7 +34,7 @@ public class ConcurrentMain {
                 "XXXX______" +
                 "";
         Field field = FieldFactory.createField(marks);
-        List<Block> allBlocks = Arrays.asList(I, T, S, Z, J, L, O);
+        List<Piece> allPieces = Arrays.asList(I, T, S, Z, J, L, O);
         int popCount = 7;
         int maxDepth = 6;
         int maxClearLine = 4;
@@ -48,15 +48,15 @@ public class ConcurrentMain {
 
         // enumerate combinations and sort
         ArrayList<Callable<PairObj>> callables = new ArrayList<>();
-        Iterable<List<Block>> permutations = new CombinationIterable<>(allBlocks, popCount);
-        for (List<Block> permutation : permutations) {
-            Iterable<List<Block>> combinations = new AllPermutationIterable<>(permutation);
-            for (List<Block> blocks : combinations) {
+        Iterable<List<Piece>> permutations = new CombinationIterable<>(allPieces, popCount);
+        for (List<Piece> permutation : permutations) {
+            Iterable<List<Piece>> combinations = new AllPermutationIterable<>(permutation);
+            for (List<Piece> pieces : combinations) {
                 callables.add(() -> {
                     Checker<Action> checker = checkerThreadLocal.get();
                     Candidate<Action> candidate = candidateThreadLocal.get();
-                    boolean check = checker.check(field, blocks, candidate, maxClearLine, maxDepth);
-                    return new PairObj(blocks, check);
+                    boolean check = checker.check(field, pieces, candidate, maxClearLine, maxDepth);
+                    return new PairObj(pieces, check);
                 });
             }
         }
@@ -68,7 +68,7 @@ public class ConcurrentMain {
         AnalyzeTree tree = new AnalyzeTree();
         for (Future<PairObj> future : futures) {
             PairObj obj = future.get();
-            List<Block> combination = obj.blocks;
+            List<Piece> combination = obj.pieces;
 //                System.out.print(combination + " => ");
             if (obj.isSucceed) {
 //                    System.out.println("success");
@@ -93,11 +93,11 @@ public class ConcurrentMain {
     }
 
     private static class PairObj {
-        private final List<Block> blocks;
+        private final List<Piece> pieces;
         private final boolean isSucceed;
 
-        PairObj(List<Block> blocks, boolean isSucceed) {
-            this.blocks = blocks;
+        PairObj(List<Piece> pieces, boolean isSucceed) {
+            this.pieces = pieces;
             this.isSucceed = isSucceed;
         }
     }

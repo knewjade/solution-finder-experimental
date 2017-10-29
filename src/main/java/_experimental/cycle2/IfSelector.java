@@ -3,13 +3,13 @@ package _experimental.cycle2;
 import common.SyntaxException;
 import common.buildup.BuildUpStream;
 import common.datastore.*;
-import common.datastore.blocks.Blocks;
-import common.datastore.blocks.LongBlocks;
+import common.datastore.blocks.Pieces;
+import common.datastore.blocks.LongPieces;
 import common.iterable.CombinationIterable;
 import common.iterable.PermutationIterable;
 import common.order.ForwardOrderLookUp;
-import common.pattern.BlocksGenerator;
-import common.pattern.IBlocksGenerator;
+import common.pattern.LoadedPatternGenerator;
+import common.pattern.PatternGenerator;
 import common.tetfu.TetfuElement;
 import common.tetfu.common.ColorConverter;
 import common.tetfu.field.ColoredField;
@@ -25,7 +25,7 @@ import core.field.Field;
 import core.field.FieldFactory;
 import core.field.FieldView;
 import core.field.SmallField;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.MinoRotation;
@@ -80,10 +80,10 @@ public class IfSelector {
         EasyPath easyPath = new EasyPath(easyPool);
         EasyTetfu easyTetfu = new EasyTetfu(easyPool);
         ForwardOrderLookUp lookUp = new ForwardOrderLookUp(maxDepth, 7);
-        IBlocksGenerator blocksGenerator = new BlocksGenerator("*p7");
-        List<Blocks> allBlocks2 = blocksGenerator.blocksStream().collect(Collectors.toList());
+        PatternGenerator blocksGenerator = new LoadedPatternGenerator("*p7");
+        List<Pieces> allPieces2 = blocksGenerator.blocksStream().collect(Collectors.toList());
 
-        BlockCounter allIncluded = new BlockCounter(Block.valueList());
+        PieceCounter allIncluded = new PieceCounter(Piece.valueList());
 
         // すべての100%地形を読み込み
         List<Data> list = Files.lines(Paths.get("output/cycle2/IJSO.csv"))
@@ -101,8 +101,8 @@ public class IfSelector {
             // すべての検索するBlocks
             // パフェできる手順が対象
             ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, new LockedCandidateThreadLocal(height), new CheckerUsingHoldThreadLocal<>());
-            List<Pair<Blocks, Boolean>> search = invoker.search(initField, allBlocks2, height, maxDepth);
-            List<Blocks> targetBlocks = search.stream()
+            List<Pair<Pieces, Boolean>> search = invoker.search(initField, allPieces2, height, maxDepth);
+            List<Pieces> targetBlocks = search.stream()
                     .filter(Pair::getValue)
                     .map(Pair::getKey)
                     .collect(Collectors.toList());
@@ -110,27 +110,27 @@ public class IfSelector {
 
             // 条件で手順を分割
             // 2分岐させる
-            EnumMap<Block, EnumMap<Block, Map<Boolean, List<Blocks>>>> firstChoice = new EnumMap<>(Block.class);
-            PermutationIterable<Block> blockPermutations = new PermutationIterable<>(Block.valueList(), 2);
-            for (List<Block> blocks : blockPermutations) {
-                assert blocks.size() == 2;
-                Block firstBlock = blocks.get(0);
-                Block secondBlock = blocks.get(1);
+            EnumMap<Piece, EnumMap<Piece, Map<Boolean, List<Pieces>>>> firstChoice = new EnumMap<>(Piece.class);
+            PermutationIterable<Piece> blockPermutations = new PermutationIterable<>(Piece.valueList(), 2);
+            for (List<Piece> pieces : blockPermutations) {
+                assert pieces.size() == 2;
+                Piece firstPiece = pieces.get(0);
+                Piece secondPiece = pieces.get(1);
 
-                Map<Boolean, List<Blocks>> conditional = targetBlocks.stream()
+                Map<Boolean, List<Pieces>> conditional = targetBlocks.stream()
                         .collect(Collectors.groupingBy(o -> {
-                            List<Block> blockList = o.getBlocks();
-                            return blockList.indexOf(firstBlock) < blockList.indexOf(secondBlock);
+                            List<Piece> pieceList = o.getPieces();
+                            return pieceList.indexOf(firstPiece) < pieceList.indexOf(secondPiece);
                         }));
 
-                EnumMap<Block, Map<Boolean, List<Blocks>>> secondChoice = firstChoice.computeIfAbsent(firstBlock, block -> new EnumMap<>(Block.class));
-                secondChoice.put(secondBlock, conditional);
+                EnumMap<Piece, Map<Boolean, List<Pieces>>> secondChoice = firstChoice.computeIfAbsent(firstPiece, block -> new EnumMap<>(Piece.class));
+                secondChoice.put(secondPiece, conditional);
             }
 
             // すべてのパフェ手順を取得
             List<Result> results = easyPath.calculate(initField, width, height)
                     .stream()
-                    .filter(result -> allIncluded.containsAll(new BlockCounter(result.getMemento().getOperationsStream(width).map(OperationWithKey::getBlock))))
+                    .filter(result -> allIncluded.containsAll(new PieceCounter(result.getMemento().getOperationsStream(width).map(OperationWithKey::getPiece))))
                     .collect(Collectors.toList());
             System.out.println("result size: " + results.size());
 
@@ -149,16 +149,16 @@ public class IfSelector {
                 BuildUpStream buildUpStream = new BuildUpStream(reachable, height);
                 AnalyzeTree possibleTree = getPossibleBuildingTree(initField, operationWithKeys, buildUpStream);
 
-                for (Map.Entry<Block, EnumMap<Block, Map<Boolean, List<Blocks>>>> firstEntry : firstChoice.entrySet()) {
-                    Block firstBlock = firstEntry.getKey();
-                    for (Map.Entry<Block, Map<Boolean, List<Blocks>>> secondEntry : firstEntry.getValue().entrySet()) {
-                        Block secondBlock = secondEntry.getKey();
-                        for (Map.Entry<Boolean, List<Blocks>> splitMap : secondEntry.getValue().entrySet()) {
+                for (Map.Entry<Piece, EnumMap<Piece, Map<Boolean, List<Pieces>>>> firstEntry : firstChoice.entrySet()) {
+                    Piece firstPiece = firstEntry.getKey();
+                    for (Map.Entry<Piece, Map<Boolean, List<Pieces>>> secondEntry : firstEntry.getValue().entrySet()) {
+                        Piece secondPiece = secondEntry.getKey();
+                        for (Map.Entry<Boolean, List<Pieces>> splitMap : secondEntry.getValue().entrySet()) {
                             Boolean isSatisfy = splitMap.getKey();
-                            List<Blocks> blocksList = splitMap.getValue();
-//                            boolean isFound = checksAll(lookUp, blocksList, possibleTree);
-                            boolean isFound = checksAllPercent(lookUp, blocksList, possibleTree, 0.9);
-//                            System.out.printf("%s < %s == %s -> %s%n", firstBlock, secondBlock, isSatisfy, isSucceed);
+                            List<Pieces> piecesList = splitMap.getValue();
+//                            boolean isFound = checksAll(lookUp, piecesList, possibleTree);
+                            boolean isFound = checksAllPercent(lookUp, piecesList, possibleTree, 0.9);
+//                            System.out.printf("%s < %s == %s -> %s%n", firstPiece, secondPiece, isSatisfy, isSucceed);
 
                             if (isFound)
                                 System.out.println("##########################");
@@ -228,25 +228,25 @@ public class IfSelector {
 //                continue;
 //            }
 
-            CombinationIterable<Block> blockCombinations = new CombinationIterable<>(Block.valueList(), 2);
-            for (List<Block> blockCombination : blockCombinations) {
-                assert blockCombination.size() == 2;
-                System.out.println(blockCombination);
-                Block block1 = blockCombination.get(0);
-                Block block2 = blockCombination.get(1);
+            CombinationIterable<Piece> blockCombinations = new CombinationIterable<>(Piece.valueList(), 2);
+            for (List<Piece> pieceCombination : blockCombinations) {
+                assert pieceCombination.size() == 2;
+                System.out.println(pieceCombination);
+                Piece piece1 = pieceCombination.get(0);
+                Piece piece2 = pieceCombination.get(1);
 
                 // 条件で手順を分割
-//                Map<Boolean, List<Blocks>> conditional = allBlocks.stream()
+//                Map<Boolean, List<Pieces>> conditional = allBlocks.stream()
 //                        .collect(Collectors.groupingBy(o -> {
-//                            List<Block> blockList = o.getBlockList();
-//                            return blockList.indexOf(block1) < blockList.indexOf(block2);
+//                            List<Piece> blockList = o.getBlockList();
+//                            return blockList.indexOf(piece1) < blockList.indexOf(piece2);
 //                        }));
                 // 条件ごとパフェ成功確率を計算する
 //                Pair<AnalyzeTree, AnalyzeTree> pair1 = calcPerfectPercent(lookUp, conditional, possibleTree1);
 //                Pair<AnalyzeTree, AnalyzeTree> pair2 = calcPerfectPercent(lookUp, conditional, possibleTree2);
 
                 System.out.println();
-                System.out.println(blockCombination);
+                System.out.println(pieceCombination);
 //                System.out.printf("pattern1 | %.2f | %.2f %n", pair1.getKey().getSuccessPercent(), pair1.getValue().getSuccessPercent());
 //                System.out.printf("pattern2 | %.2f | %.2f %n", pair2.getKey().getSuccessPercent(), pair2.getValue().getSuccessPercent());
 //
@@ -259,13 +259,13 @@ public class IfSelector {
         }
     }
 
-    private static boolean checksAll90(ForwardOrderLookUp lookUp, List<Blocks> allBlocks, AnalyzeTree possibleTree1, AnalyzeTree possibleTree2) {
+    private static boolean checksAll90(ForwardOrderLookUp lookUp, List<Pieces> allBlocks, AnalyzeTree possibleTree1, AnalyzeTree possibleTree2) {
 //        int need = (int) (allBlocks.size() * 0.8 );
         int count = 0;
         int no = 0;
-        for (Blocks target : allBlocks) {
-            boolean anyMatch = lookUp.parse(target.getBlocks())
-                    .map(LongBlocks::new)
+        for (Pieces target : allBlocks) {
+            boolean anyMatch = lookUp.parse(target.getPieces())
+                    .map(LongPieces::new)
                     .anyMatch(blocks -> possibleTree1.isVisited(blocks) || possibleTree2.isVisited(blocks));
             if (anyMatch) {
                 count++;
@@ -279,28 +279,28 @@ public class IfSelector {
         return 0.8 < percent;
     }
 
-    private static boolean checksAll(ForwardOrderLookUp lookUp, List<Blocks> allBlocks, AnalyzeTree possibleTree) {
+    private static boolean checksAll(ForwardOrderLookUp lookUp, List<Pieces> allBlocks, AnalyzeTree possibleTree) {
         return allBlocks.parallelStream()
-                .map(Blocks::getBlocks)
+                .map(Pieces::getPieces)
                 .map(lookUp::parse)
-                .map(stream -> stream.map(LongBlocks::new))
+                .map(stream -> stream.map(LongPieces::new))
                 .allMatch(stream -> stream.anyMatch(possibleTree::isVisited));
     }
 
-    private static boolean checksAllPercent(ForwardOrderLookUp lookUp, List<Blocks> allBlocks, AnalyzeTree possibleTree, double percent) {
+    private static boolean checksAllPercent(ForwardOrderLookUp lookUp, List<Pieces> allBlocks, AnalyzeTree possibleTree, double percent) {
         long succeedCount = allBlocks.parallelStream()
-                .map(Blocks::getBlocks)
+                .map(Pieces::getPieces)
                 .map(lookUp::parse)
-                .map(stream -> stream.map(LongBlocks::new))
+                .map(stream -> stream.map(LongPieces::new))
                 .filter(stream -> stream.anyMatch(possibleTree::isVisited))
                 .count();
         return percent <= succeedCount / allBlocks.size();
     }
 
-    private static boolean checksAll(ForwardOrderLookUp lookUp, List<Blocks> allBlocks, AnalyzeTree possibleTree1, AnalyzeTree possibleTree2) {
-        for (Blocks target : allBlocks) {
-            boolean anyMatch = lookUp.parse(target.getBlocks())
-                    .map(LongBlocks::new)
+    private static boolean checksAll(ForwardOrderLookUp lookUp, List<Pieces> allBlocks, AnalyzeTree possibleTree1, AnalyzeTree possibleTree2) {
+        for (Pieces target : allBlocks) {
+            boolean anyMatch = lookUp.parse(target.getPieces())
+                    .map(LongPieces::new)
                     .anyMatch(blocks -> possibleTree1.isVisited(blocks) || possibleTree2.isVisited(blocks));
             if (!anyMatch)
                 return false;
@@ -322,35 +322,35 @@ public class IfSelector {
         return new SRSValidSolutionFilter(initField, lockedReachableThreadLocal, sizedBit);
     }
 
-    private static Pair<AnalyzeTree, AnalyzeTree> calcPerfectPercent(ForwardOrderLookUp lookUp, Map<Boolean, List<Blocks>> conditional, AnalyzeTree possibleTree1) {
+    private static Pair<AnalyzeTree, AnalyzeTree> calcPerfectPercent(ForwardOrderLookUp lookUp, Map<Boolean, List<Pieces>> conditional, AnalyzeTree possibleTree1) {
         AnalyzeTree resultTreeTrue = new AnalyzeTree();
-        for (Blocks blocks : conditional.get(true)) {
-            boolean anyMatch = lookUp.parse(blocks.getBlocks())
-                    .map(LongBlocks::new)
+        for (Pieces pieces : conditional.get(true)) {
+            boolean anyMatch = lookUp.parse(pieces.getPieces())
+                    .map(LongPieces::new)
                     .anyMatch(possibleTree1::isVisited);
-            resultTreeTrue.set(anyMatch, blocks);
+            resultTreeTrue.set(anyMatch, pieces);
         }
 
         AnalyzeTree resultTreeFalse = new AnalyzeTree();
-        for (Blocks blocks : conditional.get(false)) {
-            boolean anyMatch = lookUp.parse(blocks.getBlocks())
-                    .map(LongBlocks::new)
+        for (Pieces pieces : conditional.get(false)) {
+            boolean anyMatch = lookUp.parse(pieces.getPieces())
+                    .map(LongPieces::new)
                     .anyMatch(possibleTree1::isVisited);
-            resultTreeFalse.set(anyMatch, blocks);
+            resultTreeFalse.set(anyMatch, pieces);
         }
 
         return new Pair<>(resultTreeTrue, resultTreeFalse);
     }
 
     private static AnalyzeTree getPossibleBuildingTree(Field field, List<MinoOperationWithKey> operationWithKeys, BuildUpStream buildUpStream) {
-        Set<LongBlocks> canBuild = buildUpStream.existsValidBuildPattern(field, operationWithKeys)
+        Set<LongPieces> canBuild = buildUpStream.existsValidBuildPattern(field, operationWithKeys)
                 .map(List::stream)
-                .map(stream -> stream.map(OperationWithKey::getBlock))
-                .map(LongBlocks::new)
+                .map(stream -> stream.map(OperationWithKey::getPiece))
+                .map(LongPieces::new)
                 .collect(Collectors.toSet());
 
         AnalyzeTree tree1 = new AnalyzeTree();
-        for (LongBlocks blocks : canBuild) {
+        for (LongPieces blocks : canBuild) {
             tree1.success(blocks);
         }
         return tree1;
@@ -363,9 +363,9 @@ public class IfSelector {
         for (int index = 0; index < operationsList.size(); index++) {
             Operation o = operationsList.get(index);
             if (index == 0)
-                elements.add(new TetfuElement(grayField, colorConverter.parseToColorType(o.getBlock()), o.getRotate(), o.getX(), o.getY()));
+                elements.add(new TetfuElement(grayField, colorConverter.parseToColorType(o.getPiece()), o.getRotate(), o.getX(), o.getY()));
             else
-                elements.add(new TetfuElement(colorConverter.parseToColorType(o.getBlock()), o.getRotate(), o.getX(), o.getY()));
+                elements.add(new TetfuElement(colorConverter.parseToColorType(o.getPiece()), o.getRotate(), o.getX(), o.getY()));
         }
         return elements;
     }

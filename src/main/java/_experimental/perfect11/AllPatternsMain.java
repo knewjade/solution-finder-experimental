@@ -1,10 +1,10 @@
 package _experimental.perfect11;
 
 import common.SyntaxException;
-import common.datastore.blocks.Blocks;
-import common.pattern.BlocksGenerator;
-import common.pattern.IBlocksGenerator;
-import core.mino.Block;
+import common.datastore.blocks.Pieces;
+import common.pattern.LoadedPatternGenerator;
+import common.pattern.PatternGenerator;
+import core.mino.Piece;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -96,11 +96,11 @@ public class AllPatternsMain {
 
     private static void output(String pattern, String path) throws IOException, SyntaxException {
         File outputFile = new File(path);
-        IBlocksGenerator generator = new BlocksGenerator(pattern);
+        PatternGenerator generator = new LoadedPatternGenerator(pattern);
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
             generator.blocksStream()
-                    .map(Blocks::getBlocks)
-                    .map(blocks -> blocks.stream().map(Block::getName).collect(Collectors.joining()))
+                    .map(Pieces::getPieces)
+                    .map(blocks -> blocks.stream().map(Piece::getName).collect(Collectors.joining()))
                     .sorted()
                     .forEach(line -> {
                         try {

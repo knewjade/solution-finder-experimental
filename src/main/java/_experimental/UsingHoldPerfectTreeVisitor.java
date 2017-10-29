@@ -3,7 +3,7 @@ package _experimental;
 import common.datastore.action.Action;
 import core.action.candidate.LockedCandidate;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.MinoRotation;
@@ -24,7 +24,7 @@ public class UsingHoldPerfectTreeVisitor implements TreeVisitor {
     private final Field initField;
     private final int maxClearLine;
     private final int maxDepth;
-    private final List<Block> blocks;
+    private final List<Piece> pieces;
 
     private final List<HashSet<SequenceElement>> elements;
     private PriorityQueue<SequenceElement> queue = new PriorityQueue<>(COMPARATOR);
@@ -41,10 +41,10 @@ public class UsingHoldPerfectTreeVisitor implements TreeVisitor {
         this.maxDepth = maxDepth;
 
         int maxListSize = maxDepth + 1;
-        List<Block> blocks = new ArrayList<>();
+        List<Piece> pieces = new ArrayList<>();
         for (int index = 0; index < maxListSize; index++)
-            blocks.add(null);
-        this.blocks = blocks;
+            pieces.add(null);
+        this.pieces = pieces;
 
         List<HashSet<SequenceElement>> elements = new ArrayList<>();
         for (int index = 0; index < maxListSize; index++)
@@ -57,8 +57,8 @@ public class UsingHoldPerfectTreeVisitor implements TreeVisitor {
     }
 
     @Override
-    public void visit(int depth, Block block) {
-        blocks.set(depth, block);
+    public void visit(int depth, Piece piece) {
+        pieces.set(depth, piece);
         if (depth < startIndex)
             startIndex = depth;
     }
@@ -72,7 +72,7 @@ public class UsingHoldPerfectTreeVisitor implements TreeVisitor {
         if (startIndex == 0) {
             // 先頭が変わったとき
             queue.clear();
-            register(new SequenceElement(initField, blocks.get(0), maxClearLine, 0));
+            register(new SequenceElement(initField, pieces.get(0), maxClearLine, 0));
         } else if (startIndex <= maxDepth) {
             // queueの整理
             while (!queue.isEmpty()) {
@@ -92,7 +92,7 @@ public class UsingHoldPerfectTreeVisitor implements TreeVisitor {
         // 探索インデックスを現在の位置でリセット
         startIndex = piecesLength;
 
-        System.out.println(blocks);
+        System.out.println(pieces);
         stopwatch.start();
 
         // 新たに探索する
@@ -122,7 +122,7 @@ public class UsingHoldPerfectTreeVisitor implements TreeVisitor {
 
     private boolean search(int piecesLength, SequenceElement element, int index, boolean isLast) {
         if (index < piecesLength) {
-            return searcherCore.stepWithNext(blocks.get(index), element, isLast);
+            return searcherCore.stepWithNext(pieces.get(index), element, isLast);
         } else {
             return searcherCore.stepWhenNoNext(element, isLast);
         }

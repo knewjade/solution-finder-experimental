@@ -14,7 +14,7 @@ import core.action.reachable.LockedReachable;
 import core.column_field.ColumnField;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.Mino;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
@@ -77,15 +77,15 @@ public class SquaresMain {
         PerfectPackSearcher searcher = new PerfectPackSearcher(inOutPairFields, basicSolutions, sizedBit, solutionFilter, taskResultHelper);
         List<Result> results = searcher.toList();
 
-        Map<BlockCounter, List<Result>> eachBlockCounter = results.stream()
+        Map<PieceCounter, List<Result>> eachBlockCounter = results.stream()
                 .filter(result -> {
                     // BlockCounterに変換
-                    BlockCounter blockCounter = new BlockCounter(result.getMemento().getRawOperationsStream()
-                            .map(OperationWithKey::getBlock));
-                    return isWith7BagSystem(squareHeight, blockCounter);
+                    PieceCounter pieceCounter = new PieceCounter(result.getMemento().getRawOperationsStream()
+                            .map(OperationWithKey::getPiece));
+                    return isWith7BagSystem(squareHeight, pieceCounter);
                 })
-                .collect(Collectors.groupingBy(result -> new BlockCounter(result.getMemento().getRawOperationsStream()
-                        .map(OperationWithKey::getBlock))));
+                .collect(Collectors.groupingBy(result -> new PieceCounter(result.getMemento().getRawOperationsStream()
+                        .map(OperationWithKey::getPiece))));
 
         ColorConverter colorConverter = new ColorConverter();
         MinoRotation minoRotation = new MinoRotation();
@@ -98,12 +98,12 @@ public class SquaresMain {
             writer.write(String.format("<html lang=ja><head><meta charset=\"UTF-8\"><title>%s</title></head><body>", title));
             writer.newLine();
 
-            ArrayList<BlockCounter> keys = new ArrayList<>(eachBlockCounter.keySet());
-            Comparator<BlockCounter> blockCounterComparator = (o1, o2) -> {
-                List<Map.Entry<Block, Integer>> list1 = new ArrayList<>(o1.getEnumMap().entrySet());
-                List<Map.Entry<Block, Integer>> list2 = new ArrayList<>(o2.getEnumMap().entrySet());
+            ArrayList<PieceCounter> keys = new ArrayList<>(eachBlockCounter.keySet());
+            Comparator<PieceCounter> blockCounterComparator = (o1, o2) -> {
+                List<Map.Entry<Piece, Integer>> list1 = new ArrayList<>(o1.getEnumMap().entrySet());
+                List<Map.Entry<Piece, Integer>> list2 = new ArrayList<>(o2.getEnumMap().entrySet());
 
-                Comparator<Map.Entry<Block, Integer>> entryComparator = (o11, o21) -> {
+                Comparator<Map.Entry<Piece, Integer>> entryComparator = (o11, o21) -> {
                     int size = -o11.getValue().compareTo(o21.getValue());
                     if (size != 0)
                         return size;
@@ -113,16 +113,16 @@ public class SquaresMain {
                 list2.sort(entryComparator);
 
                 for (int index = 0; index < list1.size(); index++) {
-                    Map.Entry<Block, Integer> entry1 = list1.get(index);
-                    Map.Entry<Block, Integer> entry2 = list2.get(index);
+                    Map.Entry<Piece, Integer> entry1 = list1.get(index);
+                    Map.Entry<Piece, Integer> entry2 = list2.get(index);
                     int compare = entry1.getValue().compareTo(entry2.getValue());
                     if (compare != 0)
                         return compare;
                 }
 
                 for (int index = 0; index < list1.size(); index++) {
-                    Map.Entry<Block, Integer> entry1 = list1.get(index);
-                    Map.Entry<Block, Integer> entry2 = list2.get(index);
+                    Map.Entry<Piece, Integer> entry1 = list1.get(index);
+                    Map.Entry<Piece, Integer> entry2 = list2.get(index);
                     int compare2 = entry1.getKey().compareTo(entry2.getKey());
                     if (compare2 != 0)
                         return compare2;
@@ -150,8 +150,8 @@ public class SquaresMain {
             writer.write("<nav><ul>");
             writer.newLine();
 
-            for (BlockCounter counterKey : keys) {
-                ArrayList<Map.Entry<Block, Integer>> entries = new ArrayList<>(counterKey.getEnumMap().entrySet());
+            for (PieceCounter counterKey : keys) {
+                ArrayList<Map.Entry<Piece, Integer>> entries = new ArrayList<>(counterKey.getEnumMap().entrySet());
                 entries.sort((o1, o2) -> {
                     Integer value1 = o1.getValue();
                     Integer value2 = o2.getValue();
@@ -175,8 +175,8 @@ public class SquaresMain {
             writer.write("</ul></nav><hr><hr>");
             writer.newLine();
 
-            for (BlockCounter counterKey : keys) {
-                ArrayList<Map.Entry<Block, Integer>> entries = new ArrayList<>(counterKey.getEnumMap().entrySet());
+            for (PieceCounter counterKey : keys) {
+                ArrayList<Map.Entry<Piece, Integer>> entries = new ArrayList<>(counterKey.getEnumMap().entrySet());
                 entries.sort((o1, o2) -> {
                     Integer value1 = o1.getValue();
                     Integer value2 = o2.getValue();
@@ -214,7 +214,7 @@ public class SquaresMain {
                                 Mino mino = key.getMino();
                                 test.put(mino, key.getX(), key.getY());
                                 test.insertWhiteLineWithKey(key.getNeedDeletedKey());
-                                blockField.merge(test, mino.getBlock());
+                                blockField.merge(test, mino.getPiece());
                             });
 
                     // テト譜の生成 (on 1page)
@@ -235,7 +235,7 @@ public class SquaresMain {
 
                     // 最初のelement
                     Operation firstKey = operationsList.get(0);
-                    ColorType colorType1 = colorConverter.parseToColorType(firstKey.getBlock());
+                    ColorType colorType1 = colorConverter.parseToColorType(firstKey.getPiece());
                     ColoredField coloredField = createInitColoredField(field);
                     TetfuElement firstElement = new TetfuElement(coloredField, colorType1, firstKey.getRotate(), firstKey.getX(), firstKey.getY(), keyName);
                     tetfuElements.add(firstElement);
@@ -244,7 +244,7 @@ public class SquaresMain {
                     if (1 < operationsList.size()) {
                         operationsList.subList(1, operationsList.size()).stream()
                                 .map(operation -> {
-                                    ColorType colorType = colorConverter.parseToColorType(operation.getBlock());
+                                    ColorType colorType = colorConverter.parseToColorType(operation.getPiece());
                                     return new TetfuElement(colorType, operation.getRotate(), operation.getX(), operation.getY(), keyName);
                                 })
                                 .forEach(tetfuElements::add);
@@ -271,19 +271,19 @@ public class SquaresMain {
         }
     }
 
-    private static boolean isWith7BagSystem(int squareHeight, BlockCounter blockCounter) {
+    private static boolean isWith7BagSystem(int squareHeight, PieceCounter pieceCounter) {
         switch (squareHeight) {
             case 4:
-                return isWith7BagSystemHeight4(blockCounter);
+                return isWith7BagSystemHeight4(pieceCounter);
             case 6:
-                return isWith7BagSystemHeight6(blockCounter);
+                return isWith7BagSystemHeight6(pieceCounter);
         }
         throw new UnsupportedOperationException("No support square height: " + squareHeight);
     }
 
-    private static boolean isWith7BagSystemHeight4(BlockCounter blockCounter) {
+    private static boolean isWith7BagSystemHeight4(PieceCounter pieceCounter) {
         // ミノの個数（最も多い・2番めに多い）を取得
-        EnumMap<Block, Integer> map = blockCounter.getEnumMap();
+        EnumMap<Piece, Integer> map = pieceCounter.getEnumMap();
         List<Integer> values = new ArrayList<>(map.values());
         values.add(0);  // ミノが2種類以下の場合はこの0を取得する
         values.add(0);
@@ -299,9 +299,9 @@ public class SquaresMain {
                 (first <= 2);
     }
 
-    private static boolean isWith7BagSystemHeight6(BlockCounter blockCounter) {
+    private static boolean isWith7BagSystemHeight6(PieceCounter pieceCounter) {
         // ミノの個数（最も多い・5番めに多い）を取得
-        EnumMap<Block, Integer> map = blockCounter.getEnumMap();
+        EnumMap<Piece, Integer> map = pieceCounter.getEnumMap();
         List<Integer> values = new ArrayList<>(map.values());
         values.add(0);  // ミノが2種類以下の場合はこの0を取得する
         values.add(0);
@@ -330,9 +330,9 @@ public class SquaresMain {
     private static TetfuElement parseBlockFieldToTetfuElement(Field initField, ColorConverter colorConverter, BlockField blockField, String comment) {
         ColoredField coloredField = createInitColoredField(initField);
 
-        for (Block block : Block.values()) {
-            Field target = blockField.get(block);
-            ColorType colorType = colorConverter.parseToColorType(block);
+        for (Piece piece : Piece.values()) {
+            Field target = blockField.get(piece);
+            ColorType colorType = colorConverter.parseToColorType(piece);
             fillInField(coloredField, colorType, target);
         }
 

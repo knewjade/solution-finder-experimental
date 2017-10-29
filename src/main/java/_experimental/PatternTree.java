@@ -4,7 +4,7 @@ import common.comparator.FieldComparator;
 import common.datastore.action.Action;
 import core.action.candidate.Candidate;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import searcher.common.validator.Validator;
 
@@ -13,42 +13,42 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class PatternTree implements IPatternTree {
-    private final EnumMap<Block, IPatternTree> map = new EnumMap<>(Block.class);
+    private final EnumMap<Piece, IPatternTree> map = new EnumMap<>(Piece.class);
     private final AtomicBoolean isPossible = new AtomicBoolean(false);
 
-    public void build(List<Block> blocks, Function<List<Block>, IPatternTree> terminate) {
-        build(blocks, 0, terminate);
+    public void build(List<Piece> pieces, Function<List<Piece>, IPatternTree> terminate) {
+        build(pieces, 0, terminate);
     }
 
     @Override
-    public void build(List<Block> blocks, int depth, Function<List<Block>, IPatternTree> terminate) {
-        assert depth < blocks.size() : depth;
-        Block block = blocks.get(depth);
+    public void build(List<Piece> pieces, int depth, Function<List<Piece>, IPatternTree> terminate) {
+        assert depth < pieces.size() : depth;
+        Piece piece = pieces.get(depth);
 
-        if (depth == blocks.size() - 1) {
-            map.computeIfAbsent(block, key -> terminate.apply(blocks));
+        if (depth == pieces.size() - 1) {
+            map.computeIfAbsent(piece, key -> terminate.apply(pieces));
         } else {
-            IPatternTree tree = map.computeIfAbsent(block, key -> new PatternTree());
-            tree.build(blocks, depth + 1, terminate);
+            IPatternTree tree = map.computeIfAbsent(piece, key -> new PatternTree());
+            tree.build(pieces, depth + 1, terminate);
         }
     }
 
-    public boolean get(List<Block> blocks) {
-        return get(blocks, 0);
+    public boolean get(List<Piece> pieces) {
+        return get(pieces, 0);
     }
 
     @Override
-    public boolean get(List<Block> blocks, int depth) {
-        assert depth < blocks.size() : depth;
-        Block block = blocks.get(depth);
+    public boolean get(List<Piece> pieces, int depth) {
+        assert depth < pieces.size() : depth;
+        Piece piece = pieces.get(depth);
 
-        assert map.containsKey(block) : map;
-        IPatternTree tree = map.get(block);
+        assert map.containsKey(piece) : map;
+        IPatternTree tree = map.get(piece);
 
-        if (depth == blocks.size() - 1) {
+        if (depth == pieces.size() - 1) {
             return tree.isPossible();
         } else {
-            return tree.get(blocks, depth + 1);
+            return tree.get(pieces, depth + 1);
         }
     }
 
@@ -73,9 +73,9 @@ public class PatternTree implements IPatternTree {
     @Override
     public boolean run(TreeVisitor visitor, int depth) {
         boolean result = true;
-        for (Map.Entry<Block, IPatternTree> entry : map.entrySet()) {
-            Block block = entry.getKey();
-            visitor.visit(depth, block);
+        for (Map.Entry<Piece, IPatternTree> entry : map.entrySet()) {
+            Piece piece = entry.getKey();
+            visitor.visit(depth, piece);
 
             IPatternTree tree = entry.getValue();
             result &= tree.run(visitor, depth + 1);
@@ -115,9 +115,9 @@ class CommonObj {
 class Obj implements Comparable<Obj> {
     private final Field field;
     private final int maxClearLine;
-    private final Block hold;
+    private final Piece hold;
 
-    public Obj(Field field, int maxClearLine, Block hold) {
+    public Obj(Field field, int maxClearLine, Piece hold) {
         this.field = field;
         this.maxClearLine = maxClearLine;
         this.hold = hold;
@@ -135,7 +135,7 @@ class Obj implements Comparable<Obj> {
         return field;
     }
 
-    public Block getHold() {
+    public Piece getHold() {
         return hold;
     }
 
@@ -155,8 +155,8 @@ class Obj implements Comparable<Obj> {
 
     @Override
     public int compareTo(Obj o) {
-        Block hold1 = this.hold;
-        Block hold2 = o.hold;
+        Piece hold1 = this.hold;
+        Piece hold2 = o.hold;
         if (hold1 == hold2) {
             return FieldComparator.compareField(this.field, o.field);
         } else {

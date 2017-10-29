@@ -1,7 +1,7 @@
 package _experimental.square4x10;
 
 import common.comparator.OperationWithKeyComparator;
-import common.datastore.BlockCounter;
+import common.datastore.PieceCounter;
 import common.datastore.MinoOperationWithKey;
 import common.datastore.OperationWithKey;
 import common.datastore.Pair;
@@ -9,7 +9,7 @@ import common.parser.OperationWithKeyInterpreter;
 import core.column_field.ColumnField;
 import core.field.Field;
 import core.field.SmallField;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.Mino;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
@@ -101,10 +101,10 @@ public class SquareFigureStep4 {
         }
         */
 
-        // Block -> Rotate -> 接着y座標 -> 消去ライン
+        // Piece -> Rotate -> 接着y座標 -> 消去ライン
         MinoFactory minoFactory = new MinoFactory();
         MinoShifter minoShifter = new MinoShifter();
-        EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap = calcMinoMap(minoFactory, minoShifter, BLOCK_HEIGHT_COUNT);
+        EnumMap<Piece, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap = calcMinoMap(minoFactory, minoShifter, BLOCK_HEIGHT_COUNT);
 
         for (PatternFile pattern : patterns) {
             System.out.println(pattern);
@@ -112,26 +112,26 @@ public class SquareFigureStep4 {
         }
     }
 
-    private static void main3(PatternFile patternFile, EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap) throws IOException {
+    private static void main3(PatternFile patternFile, EnumMap<Piece, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap) throws IOException {
         MinoFactory minoFactory = new MinoFactory();
 
         // パターンを使用ミノ別に分類する
-        Map<BlockCounter, List<List<MinoOperationWithKey>>> eachBlockCounter = Files.lines(patternFile.path)
+        Map<PieceCounter, List<List<MinoOperationWithKey>>> eachBlockCounter = Files.lines(patternFile.path)
                 .map(s -> OperationWithKeyInterpreter.parseToList(s, minoFactory))
-                .collect(Collectors.groupingBy(o -> new BlockCounter(o.stream().map(OperationWithKey::getBlock))));
+                .collect(Collectors.groupingBy(o -> new PieceCounter(o.stream().map(OperationWithKey::getPiece))));
 
         // パターン数に変換する
-        ArrayList<Pair<BlockCounter, Integer>> counters = new ArrayList<>();
-        for (Map.Entry<BlockCounter, List<List<MinoOperationWithKey>>> entry : eachBlockCounter.entrySet()) {
-            Pair<BlockCounter, Integer> pair = new Pair<>(entry.getKey(), entry.getValue().size());
+        ArrayList<Pair<PieceCounter, Integer>> counters = new ArrayList<>();
+        for (Map.Entry<PieceCounter, List<List<MinoOperationWithKey>>> entry : eachBlockCounter.entrySet()) {
+            Pair<PieceCounter, Integer> pair = new Pair<>(entry.getKey(), entry.getValue().size());
             counters.add(pair);
         }
-        Comparator<Pair<BlockCounter, Integer>> comparing = Comparator.comparing(Pair::getValue);
+        Comparator<Pair<PieceCounter, Integer>> comparing = Comparator.comparing(Pair::getValue);
         Collections.sort(counters, comparing.reversed());
 
         // 四角形に変換する
         ArrayList<Square> squares = new ArrayList<>();
-        for (Pair<BlockCounter, Integer> pair : counters) {
+        for (Pair<PieceCounter, Integer> pair : counters) {
             int w;
             int h;
             Integer value = pair.getValue();
@@ -256,7 +256,7 @@ public class SquareFigureStep4 {
         for (int index = 0, size = fixSquares.size(); index < size; index++) {
             System.out.printf("%d / %d%n", index + 1, size);
             FixSquare fixSquare = fixSquares.get(index);
-            main3(patternFile, fixSquare, eachBlockCounter.get(fixSquare.square.blockCounter), minoMap);
+            main3(patternFile, fixSquare, eachBlockCounter.get(fixSquare.square.pieceCounter), minoMap);
         }
     }
 
@@ -268,12 +268,12 @@ public class SquareFigureStep4 {
         return count;
     }
 
-    private static void main3(PatternFile patternFile, FixSquare fixSquare, List<List<MinoOperationWithKey>> lists, EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap) throws IOException {
+    private static void main3(PatternFile patternFile, FixSquare fixSquare, List<List<MinoOperationWithKey>> lists, EnumMap<Piece, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap) throws IOException {
         if (!IS_EMPTY_RUN) {
             // 全ての操作を並び替える
             for (List<MinoOperationWithKey> list : lists) {
                 list.sort((o1, o2) -> {
-                    int compareBlock = o1.getBlock().compareTo(o2.getBlock());
+                    int compareBlock = o1.getPiece().compareTo(o2.getPiece());
                     if (compareBlock != 0)
                         return compareBlock;
 
@@ -303,7 +303,7 @@ public class SquareFigureStep4 {
             return String.format("output/img/%d_%03d_%03d.png", patternFile.index, fixSquare.y + yIndex + 1, fixSquare.x + xIndex + 1);
         } else {
             // 名前を取得 (ブロック名)
-            EnumMap<Block, Integer> map = fixSquare.square.blockCounter.getEnumMap();
+            EnumMap<Piece, Integer> map = fixSquare.square.pieceCounter.getEnumMap();
             String delimiter = "-";
             String name = getName(map, delimiter);
             int index = yIndex * fixSquare.square.width + xIndex + 1;
@@ -311,15 +311,15 @@ public class SquareFigureStep4 {
         }
     }
 
-    private static void main3(String path, FixSquare fixSquare, List<List<MinoOperationWithKey>> lists, int xIndex, int yIndex, EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap, Color background) throws IOException {
+    private static void main3(String path, FixSquare fixSquare, List<List<MinoOperationWithKey>> lists, int xIndex, int yIndex, EnumMap<Piece, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap, Color background) throws IOException {
 //        System.out.printf("generate: %s (%d, %d)%n", fixSquare, xIndex, yIndex);
 
         // リストの準備
-        EnumMap<Block, List<TaskData>> normalColorTasks = new EnumMap<>(Block.class);
-        EnumMap<Block, List<TaskData>> strongColorTasks = new EnumMap<>(Block.class);
-        for (Block block : Block.values()) {
-            normalColorTasks.put(block, new ArrayList<>());
-            strongColorTasks.put(block, new ArrayList<>());
+        EnumMap<Piece, List<TaskData>> normalColorTasks = new EnumMap<>(Piece.class);
+        EnumMap<Piece, List<TaskData>> strongColorTasks = new EnumMap<>(Piece.class);
+        for (Piece piece : Piece.values()) {
+            normalColorTasks.put(piece, new ArrayList<>());
+            strongColorTasks.put(piece, new ArrayList<>());
         }
 
         ArrayList<TaskData> blackColorTasks = new ArrayList<>();
@@ -367,17 +367,17 @@ public class SquareFigureStep4 {
                     blackColorTasks.add(new TaskData(left, top));
 
                     // 色を決定する
-                    EnumMap<Block, Prev> prev = new EnumMap<>(Block.class);
+                    EnumMap<Piece, Prev> prev = new EnumMap<>(Piece.class);
                     for (MinoOperationWithKey operationWithKey : sample) {
-                        Block block = operationWithKey.getBlock();
+                        Piece piece = operationWithKey.getPiece();
                         Mino mino = operationWithKey.getMino();
-                        List<Delta> deltas = minoMap.get(mino.getBlock()).get(mino.getRotate()).get(operationWithKey.getY()).get(operationWithKey.getNeedDeletedKey());
-//                        System.out.println(block);
+                        List<Delta> deltas = minoMap.get(mino.getPiece()).get(mino.getRotate()).get(operationWithKey.getY()).get(operationWithKey.getNeedDeletedKey());
+//                        System.out.println(piece);
 //                        System.out.println(deltas);
                         int x = operationWithKey.getX();
                         int y = operationWithKey.getY();
 
-                        Prev prevKey = prev.getOrDefault(block, null);
+                        Prev prevKey = prev.getOrDefault(piece, null);
 
                         SmallField field = new SmallField();
                         field.put(operationWithKey.getMino(), operationWithKey.getX(), operationWithKey.getY());
@@ -385,21 +385,21 @@ public class SquareFigureStep4 {
 
                         List<TaskData> list;
                         if (prevKey == null) {
-                            list = normalColorTasks.get(block);
-                            prev.put(block, new Prev(field));
+                            list = normalColorTasks.get(piece);
+                            prev.put(piece, new Prev(field));
                         } else {
                             if (!prevKey.flag) {
                                 boolean isNoDuplicate = prevKey.getRange().canMerge(field);
                                 if (isNoDuplicate) {
-                                    list = normalColorTasks.get(block);
-                                    prev.put(block, new Prev(field));
+                                    list = normalColorTasks.get(piece);
+                                    prev.put(piece, new Prev(field));
                                 } else {
-                                    list = strongColorTasks.get(block);
-                                    prev.put(block, new Prev(field, true));
+                                    list = strongColorTasks.get(piece);
+                                    prev.put(piece, new Prev(field, true));
                                 }
                             } else {
-                                list = normalColorTasks.get(block);
-                                prev.put(block, new Prev(field));
+                                list = normalColorTasks.get(piece);
+                                prev.put(piece, new Prev(field));
                             }
                         }
 
@@ -415,7 +415,7 @@ public class SquareFigureStep4 {
         generateFigure(path, background, fixSquare, xIndex, yIndex, normalColorTasks, strongColorTasks, blackColorTasks);
     }
 
-    private static void generateFigure(String path, Color background, FixSquare fixSquare, int xIndex, int yIndex, EnumMap<Block, List<TaskData>> normalColorTasks, EnumMap<Block, List<TaskData>> strongColorTasks, ArrayList<TaskData> blackColorTasks) throws IOException {
+    private static void generateFigure(String path, Color background, FixSquare fixSquare, int xIndex, int yIndex, EnumMap<Piece, List<TaskData>> normalColorTasks, EnumMap<Piece, List<TaskData>> strongColorTasks, ArrayList<TaskData> blackColorTasks) throws IOException {
         int widthSize = (FIELD_WIDTH_SIZE + FIELD_WIDTH_MARGIN) * FIELD_COLUMN_COUNT;
         int heightSize = (FIELD_HEIGHT_SIZE + FIELD_HEIGHT_MARGIN) * FIELD_ROW_COUNT;
 
@@ -452,8 +452,8 @@ public class SquareFigureStep4 {
             // テキストを入力
             graphics.setColor(new Color(0x4E4E4E));
             if (xIndex == 0 && yIndex == 0) {
-                EnumMap<Block, Integer> map = fixSquare.square.blockCounter.getEnumMap();
-                ArrayList<Map.Entry<Block, Integer>> entries = new ArrayList<>(map.entrySet());
+                EnumMap<Piece, Integer> map = fixSquare.square.pieceCounter.getEnumMap();
+                ArrayList<Map.Entry<Piece, Integer>> entries = new ArrayList<>(map.entrySet());
 //            entries.sort((o1, o2) -> {
 //                int compare = Integer.compare(o1.getValue(), o2.getValue());
 //                if (compare != 0)
@@ -494,7 +494,7 @@ public class SquareFigureStep4 {
             }
 
             // ブロックを塗る
-            for (Block key : normalColorTasks.keySet()) {
+            for (Piece key : normalColorTasks.keySet()) {
                 List<TaskData> normalColor = normalColorTasks.get(key);
                 List<TaskData> strongColor = strongColorTasks.get(key);
 
@@ -522,9 +522,9 @@ public class SquareFigureStep4 {
         ImageIO.write(image, "png", new File(path));
     }
 
-    private static String getName(EnumMap<Block, Integer> map, String delimiter) {
+    private static String getName(EnumMap<Piece, Integer> map, String delimiter) {
         // 使用個数ごとのマップに代入
-        Map<Integer, List<Map.Entry<Block, Integer>>> eachCount = new ArrayList<>(map.entrySet()).stream()
+        Map<Integer, List<Map.Entry<Piece, Integer>>> eachCount = new ArrayList<>(map.entrySet()).stream()
                 .collect(Collectors.groupingBy(Map.Entry::getValue));
 
         // キーを多い順にソート
@@ -534,10 +534,10 @@ public class SquareFigureStep4 {
         // 文字列に変換
         ArrayList<String> strings = new ArrayList<>();
         for (int count : keys) {
-            List<Map.Entry<Block, Integer>> list = eachCount.get(count);
+            List<Map.Entry<Piece, Integer>> list = eachCount.get(count);
             String blockNames = list.stream()
                     .map(Map.Entry::getKey)
-                    .map(Block::getName)
+                    .map(Piece::getName)
                     .collect(Collectors.joining());
             strings.add(blockNames + "x" + count);
         }
@@ -547,13 +547,13 @@ public class SquareFigureStep4 {
                 .collect(Collectors.joining(delimiter));
     }
 
-    private static EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> calcMinoMap(MinoFactory minoFactory, MinoShifter minoShifter, int height) {
+    private static EnumMap<Piece, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> calcMinoMap(MinoFactory minoFactory, MinoShifter minoShifter, int height) {
         // 分割されたミノ一覧
         SizedBit sizedBit = new SizedBit(1, height);
         SeparableMinos separableMinos = SeparableMinos.createSeparableMinos(minoFactory, minoShifter, sizedBit);
 
         // マップにする
-        EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap = new EnumMap<>(Block.class);
+        EnumMap<Piece, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap = new EnumMap<>(Piece.class);
         for (SeparableMino separableMino : separableMinos.getMinos()) {
             MinoOperationWithKey operationWithKey = separableMino.toMinoOperationWithKey();
             ColumnField field = separableMino.getField();
@@ -569,9 +569,9 @@ public class SquareFigureStep4 {
                         deltas.add(new Delta(xIndex - x, yIndex - y));
             assert deltas.size() == 4 : deltas;
 
-            // Block -> Rotate
-            Block block = mino.getBlock();
-            EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>> rotateMap = minoMap.computeIfAbsent(block, (key -> new EnumMap<>(Rotate.class)));
+            // Piece -> Rotate
+            Piece piece = mino.getPiece();
+            EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>> rotateMap = minoMap.computeIfAbsent(piece, (key -> new EnumMap<>(Rotate.class)));
 
             // Rotate -> height
             Rotate rotate = mino.getRotate();
@@ -680,7 +680,7 @@ public class SquareFigureStep4 {
         System.out.println(emptyCounter);
     }
 
-    private static Color getNormalColor(Block key) {
+    private static Color getNormalColor(Piece key) {
         switch (key) {
             case I:
                 return new Color(0x01BDFF);
@@ -702,7 +702,7 @@ public class SquareFigureStep4 {
     }
 
 
-    private static Color getStrongColor(Block key) {
+    private static Color getStrongColor(Piece key) {
         switch (key) {
             case I:
                 return new Color(0x02ADE6);
@@ -807,13 +807,13 @@ public class SquareFigureStep4 {
     }
 
     private static class Square {
-        private final BlockCounter blockCounter;
+        private final PieceCounter pieceCounter;
         private final int solutionCount;
         private final int width;
         private final int height;
 
-        public Square(BlockCounter blockCounter, int solutionCount, int width, int height) {
-            this.blockCounter = blockCounter;
+        public Square(PieceCounter pieceCounter, int solutionCount, int width, int height) {
+            this.pieceCounter = pieceCounter;
             this.solutionCount = solutionCount;
             this.width = width;
             this.height = height;

@@ -2,18 +2,18 @@ package _experimental.unused;
 
 import common.SyntaxException;
 import common.comparator.OperationWithKeyComparator;
-import common.datastore.BlockCounter;
+import common.datastore.PieceCounter;
 import common.datastore.OperationWithKey;
-import common.datastore.blocks.Blocks;
+import common.datastore.blocks.Pieces;
 import common.iterable.CombinationIterable;
 import common.parser.OperationWithKeyInterpreter;
-import common.pattern.BlocksGenerator;
-import common.pattern.IBlocksGenerator;
+import common.pattern.LoadedPatternGenerator;
+import common.pattern.PatternGenerator;
 import concurrent.LockedReachableThreadLocal;
 import core.column_field.ColumnField;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import lib.Stopwatch;
@@ -58,10 +58,10 @@ public class PackMain {
                 "*, *p6, *p4"
         );
 
-        IBlocksGenerator pieces = new BlocksGenerator(allOnHold);
-        HashSet<BlockCounter> counters = pieces.blocksStream().parallel()
-                .map(Blocks::getBlocks)
-                .map(BlockCounter::new)
+        PatternGenerator pieces = new LoadedPatternGenerator(allOnHold);
+        HashSet<PieceCounter> counters = pieces.blocksStream().parallel()
+                .map(Pieces::getPieces)
+                .map(PieceCounter::new)
                 .collect(Collectors.toCollection(HashSet::new));
 
         System.out.println(counters.size());
@@ -137,15 +137,15 @@ public class PackMain {
         System.out.println(stopwatch2.toMessage(TimeUnit.MILLISECONDS));
     }
 
-    private static SolutionFilter createUsingBlockAndValidKeyMementoFilter(Field initField, SizedBit sizedBit, HashSet<BlockCounter> counters) {
+    private static SolutionFilter createUsingBlockAndValidKeyMementoFilter(Field initField, SizedBit sizedBit, HashSet<PieceCounter> counters) {
         HashSet<Long> validBlockCounters = new HashSet<>();
 
-        for (BlockCounter counter : counters) {
-            List<Block> usingBlocks = counter.getBlocks();
-            for (int size = 1; size <= usingBlocks.size(); size++) {
-                CombinationIterable<Block> combinationIterable = new CombinationIterable<>(usingBlocks, size);
-                for (List<Block> blocks : combinationIterable) {
-                    BlockCounter newCounter = new BlockCounter(blocks);
+        for (PieceCounter counter : counters) {
+            List<Piece> usingPieces = counter.getBlocks();
+            for (int size = 1; size <= usingPieces.size(); size++) {
+                CombinationIterable<Piece> combinationIterable = new CombinationIterable<>(usingPieces, size);
+                for (List<Piece> pieces : combinationIterable) {
+                    PieceCounter newCounter = new PieceCounter(pieces);
                     validBlockCounters.add(newCounter.getCounter());
                 }
             }

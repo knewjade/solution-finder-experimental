@@ -2,15 +2,15 @@ package _experimental.perfect11;
 
 import common.buildup.BuildUp;
 import common.datastore.MinoOperationWithKey;
-import common.datastore.blocks.Blocks;
-import common.datastore.blocks.LongBlocks;
+import common.datastore.blocks.LongPieces;
+import common.datastore.blocks.Pieces;
 import common.order.OrderLookup;
 import common.parser.BlockInterpreter;
 import common.parser.OperationWithKeyInterpreter;
 import concurrent.LockedReachableThreadLocal;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 
 import java.io.*;
@@ -31,7 +31,7 @@ public class ExtractNoPerfectOrderMain {
         Field field = FieldFactory.createField(height);
         LockedReachableThreadLocal reachableThreadLocal = new LockedReachableThreadLocal(height);
 
-        List<LongBlocks> notPerfectOrders = Files.lines(includeNGPath, StandardCharsets.UTF_8)
+        List<LongPieces> notPerfectOrders = Files.lines(includeNGPath, StandardCharsets.UTF_8)
                 .peek(System.out::println)
                 .flatMap(name -> {
                     Path perfectPath = Paths.get(String.format("output/perfect10each/%s.csv", name));
@@ -42,15 +42,15 @@ public class ExtractNoPerfectOrderMain {
                     try {
                         return Files.lines(orderPath, StandardCharsets.UTF_8)
                                 .map(BlockInterpreter::parse10)
-                                .map(LongBlocks::new)
+                                .map(LongPieces::new)
                                 .filter(longPieces -> {
-                                    List<Block> blocks = longPieces.getBlocks();
+                                    List<Piece> pieces = longPieces.getPieces();
                                     return perfects.parallelStream()
-                                            .noneMatch(operationWithKeys -> BuildUp.existsValidByOrder(field, operationWithKeys.stream(), blocks, 4, reachableThreadLocal.get()));
+                                            .noneMatch(operationWithKeys -> BuildUp.existsValidByOrder(field, operationWithKeys.stream(), pieces, 4, reachableThreadLocal.get()));
                                 })
                                 .filter(longPieces -> {
-                                    List<Block> blocks = longPieces.getBlocks();
-                                    return OrderLookup.forwardBlocks(blocks, 10).stream()
+                                    List<Piece> pieces = longPieces.getPieces();
+                                    return OrderLookup.forwardBlocks(pieces, 10).stream()
                                             .noneMatch(forward -> perfects.parallelStream()
                                                     .anyMatch(operationWithKeys -> BuildUp.existsValidByOrder(field, operationWithKeys.stream(), forward.toList(), 4, reachableThreadLocal.get())));
                                 });
@@ -65,8 +65,8 @@ public class ExtractNoPerfectOrderMain {
         // output
         File outputFile = new File("output/order10noperfect.csv");
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8))) {
-            for (Blocks pieces : notPerfectOrders) {
-                String blocks = pieces.blockStream().map(Block::getName).collect(Collectors.joining());
+            for (Pieces pieces : notPerfectOrders) {
+                String blocks = pieces.blockStream().map(Piece::getName).collect(Collectors.joining());
                 try {
                     writer.write(blocks);
                     writer.newLine();

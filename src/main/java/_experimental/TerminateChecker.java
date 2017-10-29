@@ -1,6 +1,6 @@
 package _experimental;
 
-import core.mino.Block;
+import core.mino.Piece;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -10,11 +10,11 @@ public class TerminateChecker implements IPatternTree {
     private final AtomicBoolean isPossible = new AtomicBoolean(false);
 
     @Override
-    public void build(List<Block> blocks, int depth, Function<List<Block>, IPatternTree> terminate) {
+    public void build(List<Piece> pieces, int depth, Function<List<Piece>, IPatternTree> terminate) {
     }
 
     @Override
-    public boolean get(List<Block> blocks, int depth) {
+    public boolean get(List<Piece> pieces, int depth) {
         return isPossible();
     }
 

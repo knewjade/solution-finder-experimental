@@ -3,7 +3,7 @@ package _experimental.unused;
 import core.action.candidate.Candidate;
 import core.action.candidate.LockedCandidate;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import core.srs.MinoRotation;
@@ -41,7 +41,7 @@ public class CheckerInvoker {
         this.stopwatch = stopwatch;
     }
 
-    public void measure(Field field, List<Block> blocks, int maxExecuteCount) {
+    public void measure(Field field, List<Piece> pieces, int maxExecuteCount) {
         // 残りのスペースが4の倍数でないときはエラー
         int emptyCount = maxClearLine * 10 - field.getNumOfAllBlocks();
         if (emptyCount % 4 != 0)
@@ -49,13 +49,13 @@ public class CheckerInvoker {
 
         // ブロック数が足りないときはエラー
         int maxDepth = emptyCount / 4;
-        if (blocks.size() < maxDepth)
-            throw new IllegalArgumentException("Error: blocks size check short: " + blocks.size() + " < " + maxDepth);
+        if (pieces.size() < maxDepth)
+            throw new IllegalArgumentException("Error: pieces size check short: " + pieces.size() + " < " + maxDepth);
 
         // 計測
         for (int count = 0; count < maxExecuteCount; count++) {
             stopwatch.start();
-            lastResult = checker.check(field, blocks, candidate, maxClearLine, maxDepth);
+            lastResult = checker.check(field, pieces, candidate, maxClearLine, maxDepth);
             stopwatch.stop();
         }
     }

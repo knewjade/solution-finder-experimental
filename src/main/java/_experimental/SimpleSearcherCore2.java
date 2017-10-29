@@ -3,7 +3,7 @@ package _experimental;
 import common.datastore.action.Action;
 import core.action.candidate.Candidate;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.Mino;
 import core.mino.MinoFactory;
 import searcher.common.validator.Validator;
@@ -23,8 +23,8 @@ public class SimpleSearcherCore2<T extends Action> {
         this.candidate = candidate;
     }
 
-    public boolean stepWithNext(Block drawn, SequenceElement element, boolean isLast) {
-        Block hold = element.getHold();
+    public boolean stepWithNext(Piece drawn, SequenceElement element, boolean isLast) {
+        Piece hold = element.getHold();
         boolean stepWithoutHold = step(drawn, hold, element, isLast);
 
         if (drawn == hold)
@@ -35,16 +35,16 @@ public class SimpleSearcherCore2<T extends Action> {
         return stepWithoutHold | stepUsingHold;
     }
 
-    public boolean stepWithNextNoHold(Block drawn, SequenceElement element, boolean isLast) {
+    public boolean stepWithNextNoHold(Piece drawn, SequenceElement element, boolean isLast) {
         return step(drawn, element.getHold(), element, isLast);
     }
 
     public boolean stepWhenNoNext(SequenceElement element, boolean isLast) {
-        Block hold = element.getHold();
+        Piece hold = element.getHold();
         return step(hold, null, element, isLast);
     }
 
-    private boolean step(Block drawn, Block nextHold, SequenceElement element, boolean isLast) {
+    private boolean step(Piece drawn, Piece nextHold, SequenceElement element, boolean isLast) {
         Field currentField = element.getField();
         int max = element.getMaxClearLine();
         int nextDepth = element.getDepth() + 1;

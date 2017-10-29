@@ -1,10 +1,10 @@
 package _experimental.putter;
 
-import common.datastore.BlockCounter;
+import common.datastore.PieceCounter;
 import concurrent.LockedReachableThreadLocal;
 import core.column_field.ColumnField;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
 import lib.Randoms;
@@ -55,7 +55,7 @@ public class PathSpeedTestMain {
             List<Result> results = searcher.toList();
         }
 
-        BlockCounter allBlock = new BlockCounter(Block.valueList());
+        PieceCounter allBlock = new PieceCounter(Piece.valueList());
 
         Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
         List<InOutPairField> inOutPairFields = InOutPairField.createInOutPairFields(sizedBit, initField);

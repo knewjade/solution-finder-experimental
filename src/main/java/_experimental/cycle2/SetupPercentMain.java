@@ -1,17 +1,17 @@
 package _experimental.cycle2;
 
 import common.SyntaxException;
+import common.datastore.PieceCounter;
+import common.datastore.blocks.LongPieces;
+import common.pattern.LoadedPatternGenerator;
 import helper.EasyPath;
 import helper.EasyPool;
-import common.datastore.BlockCounter;
-import common.datastore.blocks.LongBlocks;
 import common.order.ForwardOrderLookUp;
-import common.pattern.BlocksGenerator;
 import common.tree.AnalyzeTree;
 import core.field.Field;
 import core.field.FieldFactory;
 import core.field.FieldView;
-import core.mino.Block;
+import core.mino.Piece;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,8 +28,8 @@ public class SetupPercentMain {
         EasyPath easyPath = new EasyPath(easyPool);
         Field emptyField = FieldFactory.createField(height);
 
-        HashSet<LongBlocks> allBlocksSet = new HashSet<>();
-        BlockCounter allBlockCounter = new BlockCounter(Stream.of(Block.I, Block.O, Block.S, Block.Z, Block.L, Block.J));
+        HashSet<LongPieces> allBlocksSet = new HashSet<>();
+        PieceCounter allPieceCounter = new PieceCounter(Stream.of(Piece.I, Piece.O, Piece.S, Piece.Z, Piece.L, Piece.J));
 
         String marksRight = "" +
                 "XXXXXX____" +
@@ -42,8 +42,8 @@ public class SetupPercentMain {
             String slidedField = FieldView.toString(rightField, 4, "");
             System.out.println(FieldView.toString(FieldFactory.createField(slidedField)));
 
-            Set<LongBlocks> results = easyPath.buildUp(slidedField, emptyField, width, height).stream()
-                    .filter(longBlocks -> new BlockCounter(longBlocks.blockStream()).equals(allBlockCounter))
+            Set<LongPieces> results = easyPath.buildUp(slidedField, emptyField, width, height).stream()
+                    .filter(longBlocks -> new PieceCounter(longBlocks.blockStream()).equals(allPieceCounter))
                     .collect(Collectors.toSet());
             System.out.println(results.size());
 
@@ -57,14 +57,14 @@ public class SetupPercentMain {
 
         AnalyzeTree tree = new AnalyzeTree();
         ForwardOrderLookUp lookUp = new ForwardOrderLookUp(7, 7);
-        new BlocksGenerator("*!").blocksStream()
+        new LoadedPatternGenerator("*!").blocksStream()
                 .forEach(blocks -> {
-                    boolean canBuildUp = lookUp.parse(blocks.getBlocks())
-                            .map(LongBlocks::new)
-                            .filter(longBlocks -> longBlocks.getLastBlock() == Block.T)
-                            .anyMatch(longBlocks -> allBlocksSet.contains(new LongBlocks(longBlocks.blockStream().limit(6))));
+                    boolean canBuildUp = lookUp.parse(blocks.getPieces())
+                            .map(LongPieces::new)
+                            .filter(longBlocks -> longBlocks.getLastBlock() == Piece.T)
+                            .anyMatch(longBlocks -> allBlocksSet.contains(new LongPieces(longBlocks.blockStream().limit(6))));
                     tree.set(canBuildUp, blocks);
-                    System.out.println(blocks.blockStream().map(Block::getName).collect(Collectors.joining()) + "," + (canBuildUp ? "LAST_OPERATION" : "X"));
+                    System.out.println(blocks.blockStream().map(Piece::getName).collect(Collectors.joining()) + "," + (canBuildUp ? "LAST_OPERATION" : "X"));
                 });
 //        System.out.println(tree.show());
 //        System.out.println(tree.tree(2));

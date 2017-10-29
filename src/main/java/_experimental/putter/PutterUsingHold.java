@@ -5,7 +5,7 @@ import common.datastore.order.NormalOrder;
 import common.datastore.order.Order;
 import core.action.candidate.Candidate;
 import core.field.Field;
-import core.mino.Block;
+import core.mino.Piece;
 import core.mino.MinoFactory;
 import searcher.checkmate.CheckmateDataPool;
 import searcher.common.validator.Validator;
@@ -23,12 +23,12 @@ public class PutterUsingHold<T extends Action> {
         this.searcherCore = new SimpleSearcherCore<T>(minoFactory, validator, dataPool);
     }
 
-    public TreeSet<Order> search(Field initField, List<Block> pieces, Candidate<T> candidate, int maxClearLine, int maxDepth) {
-        Block[] blocks = new Block[pieces.size()];
+    public TreeSet<Order> search(Field initField, List<Piece> pieces, Candidate<T> candidate, int maxClearLine, int maxDepth) {
+        Piece[] blocks = new Piece[pieces.size()];
         return search(initField, pieces.toArray(blocks), candidate, maxClearLine, maxDepth);
     }
 
-    public TreeSet<Order> search(Field initField, Block[] pieces, Candidate<T> candidate, int maxClearLine, int maxDepth) {
+    public TreeSet<Order> search(Field initField, Piece[] pieces, Candidate<T> candidate, int maxClearLine, int maxDepth) {
         Field freeze = initField.freeze(maxClearLine);
         int deleteLine = freeze.clearLine();
 
@@ -43,7 +43,7 @@ public class PutterUsingHold<T extends Action> {
             boolean isLast = depth == maxDepth;
 
             if (depth < pieces.length) {
-                Block drawn = pieces[depth];
+                Piece drawn = pieces[depth];
 
                 for (int count = 0, size = orders.size(); count < size; count++) {
                     Order order = orders.pollFirst();

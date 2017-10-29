@@ -3,7 +3,7 @@ package _experimental.unused;
 import common.tree.AnalyzeTree;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Block;
+import core.mino.Piece;
 import lib.Stopwatch;
 import common.iterable.AllPermutationIterable;
 import common.iterable.CombinationIterable;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static core.mino.Block.*;
+import static core.mino.Piece.*;
 
 public class CheckerMain {
     public static void main(String[] args) {
@@ -24,7 +24,7 @@ public class CheckerMain {
 
     private static void measure() {
         // Invoker
-        List<Block> blocks = Arrays.asList(I, T, L, J, S, Z, J, L, T);
+        List<Piece> pieces = Arrays.asList(I, T, L, J, S, Z, J, L, T);
         int maxClearLine = 4;
         CheckmateInvoker invoker = CheckmateInvoker.createPerfectCheckmateUsingHold(maxClearLine);
 
@@ -38,13 +38,13 @@ public class CheckerMain {
         Field field = FieldFactory.createField(marks);
 
         // Measure
-        invoker.measure(field, blocks, 500);
+        invoker.measure(field, pieces, 500);
         invoker.show(false);
         invoker.clearStopwatch();
 
         System.out.println("---");
 
-        invoker.measure(field, blocks, 1000);
+        invoker.measure(field, pieces, 1000);
         invoker.show(true);
     }
 
@@ -52,7 +52,7 @@ public class CheckerMain {
         Stopwatch stopwatch = Stopwatch.createStartedStopwatch();
 
         // Invoker
-        List<Block> blocks = Arrays.asList(I, T, S, Z, J, L, O);
+        List<Piece> pieces = Arrays.asList(I, T, S, Z, J, L, O);
         int popCount = 7;
         int maxClearLine = 4;
         CheckerInvoker invoker = CheckerInvoker.createInstance(maxClearLine);
@@ -67,12 +67,12 @@ public class CheckerMain {
         Field field = FieldFactory.createField(marks);
 
         // enumerate combinations and sort
-        ArrayList<List<Block>> allCombinations = new ArrayList<>();
-        Iterable<List<Block>> permutations = new CombinationIterable<>(blocks, popCount);
-        for (List<Block> permutation : permutations) {
-            Iterable<List<Block>> combinations = new AllPermutationIterable<>(permutation);
-            for (List<Block> combination : combinations) {
-//                combination.add(0, Block.T);
+        ArrayList<List<Piece>> allCombinations = new ArrayList<>();
+        Iterable<List<Piece>> permutations = new CombinationIterable<>(pieces, popCount);
+        for (List<Piece> permutation : permutations) {
+            Iterable<List<Piece>> combinations = new AllPermutationIterable<>(permutation);
+            for (List<Piece> combination : combinations) {
+//                combination.add(0, Piece.T);
                 allCombinations.add(combination);
             }
         }
@@ -96,7 +96,7 @@ public class CheckerMain {
         // Measure
         AnalyzeTree tree = new AnalyzeTree();
 //        AnalyzeTree treeFail = new AnalyzeTree();
-        for (List<Block> combination : allCombinations) {
+        for (List<Piece> combination : allCombinations) {
             invoker.measure(field, combination, 1);
 
 //                System.out.print(combination + " => ");
@@ -128,7 +128,7 @@ public class CheckerMain {
 
     private static void enumerate2() {
         // Invoker
-        List<Block> blocks = Arrays.asList(I, T, S, Z, J, L, O);
+        List<Piece> pieces = Arrays.asList(I, T, S, Z, J, L, O);
         int popCount = 7;
         int maxClearLine = 4;
         CheckmateInvoker invoker = CheckmateInvoker.createPerfectCheckmateUsingHold(maxClearLine);
@@ -143,12 +143,12 @@ public class CheckerMain {
         Field field = FieldFactory.createField(marks);
 
         // enumerate combinations and sort
-        ArrayList<List<Block>> allCombinations = new ArrayList<>();
-        Iterable<List<Block>> permutations = new CombinationIterable<>(blocks, popCount);
-        for (List<Block> permutation : permutations) {
-            Iterable<List<Block>> combinations = new AllPermutationIterable<>(permutation);
-            for (List<Block> combination : combinations) {
-//                combination.add(0, Block.T);
+        ArrayList<List<Piece>> allCombinations = new ArrayList<>();
+        Iterable<List<Piece>> permutations = new CombinationIterable<>(pieces, popCount);
+        for (List<Piece> permutation : permutations) {
+            Iterable<List<Piece>> combinations = new AllPermutationIterable<>(permutation);
+            for (List<Piece> combination : combinations) {
+//                combination.add(0, Piece.T);
                 allCombinations.add(combination);
             }
         }
@@ -172,7 +172,7 @@ public class CheckerMain {
         // Measure
         AnalyzeTree tree = new AnalyzeTree();
 //        AnalyzeTree treeFail = new AnalyzeTree();
-        for (List<Block> combination : allCombinations) {
+        for (List<Piece> combination : allCombinations) {
             invoker.measure(field, combination, 1);
 
 //                System.out.print(combination + " => ");

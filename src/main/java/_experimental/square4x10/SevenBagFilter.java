@@ -1,7 +1,7 @@
 package _experimental.square4x10;
 
-import common.datastore.BlockCounter;
-import core.mino.Block;
+import common.datastore.PieceCounter;
+import core.mino.Piece;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,11 +9,11 @@ import java.util.EnumMap;
 import java.util.List;
 
 class SevenBagFilter {
-    static boolean isIn7Bag(BlockCounter blockCounter) {
-        assert blockCounter.getBlockStream().count() <= 10;
+    static boolean isIn7Bag(PieceCounter pieceCounter) {
+        assert pieceCounter.getBlockStream().count() <= 10;
 
         // ミノの個数（最も多い・2番めに多い）を取得
-        EnumMap<Block, Integer> map = blockCounter.getEnumMap();
+        EnumMap<Piece, Integer> map = pieceCounter.getEnumMap();
         List<Integer> values = new ArrayList<>(map.values());
         values.add(0);  // ミノが2種類以下の場合はこの0を取得する
         values.add(0);
