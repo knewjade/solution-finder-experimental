@@ -139,7 +139,7 @@ public class Main {
             // 成功時
             String values = ALL_BLOCKS.stream().map(block -> {
                 if (hold.contains(block))
-                    return "O";
+                    return "LAST_OPERATION";
                 else if (!blocks.subList(1,blocks.size()).contains(block))
                     return "*";
                 return "";

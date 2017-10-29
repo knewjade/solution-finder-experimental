@@ -555,9 +555,10 @@ public class SquareFigureStep4 {
         // マップにする
         EnumMap<Block, EnumMap<Rotate, ArrayList<HashMap<Long, List<Delta>>>>> minoMap = new EnumMap<>(Block.class);
         for (SeparableMino separableMino : separableMinos.getMinos()) {
+            MinoOperationWithKey operationWithKey = separableMino.toMinoOperationWithKey();
             ColumnField field = separableMino.getField();
-            Mino mino = separableMino.getMino();
-            int x = separableMino.getX();
+            Mino mino = operationWithKey.getMino();
+            int x = operationWithKey.getX();
             int y = separableMino.getLowerY() - mino.getMinY();
 
             // 4x4の範囲にあるブロックをみつけて、回転軸からの差分を計算
@@ -585,7 +586,7 @@ public class SquareFigureStep4 {
             HashMap<Long, List<Delta>> deleteMap = heightList.get(y);
 
             // 追加する
-            deleteMap.put(separableMino.getDeleteKey(), deltas);
+            deleteMap.put(operationWithKey.getNeedDeletedKey(), deltas);
         }
         return minoMap;
     }

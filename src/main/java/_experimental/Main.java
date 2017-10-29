@@ -33,8 +33,8 @@ public class Main {
 
     private static void start() throws SyntaxException {
         PatternTree tree = new PatternTree();
-//        PiecesGenerator blocksGenerator = new BlocksGenerator("I,I,J,L,O,[SZT]p3,*p3");
-        IBlocksGenerator blocksGenerator = new BlocksGenerator("I,I,J,L,O,S,Z,T,*p3");
+//        PiecesGenerator blocksGenerator = new BlocksGenerator("I,I,J,L,LAST_OPERATION,[SZT]p3,*p3");
+        IBlocksGenerator blocksGenerator = new BlocksGenerator("I,I,J,L,LAST_OPERATION,S,Z,T,*p3");
         List<Blocks> piecesList = blocksGenerator.blocksStream().collect(Collectors.toList());
         piecesList.forEach(pieces -> tree.build(pieces.getBlocks(), blocks -> new TerminateChecker()));
 

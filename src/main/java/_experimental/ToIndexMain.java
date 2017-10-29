@@ -76,9 +76,10 @@ public class ToIndexMain {
 
     private static Field toField(SeparableMino separableMino) {
         Field field = FieldFactory.createField(4);
-        Mino mino = separableMino.getMino();
-        field.put(mino, separableMino.getX(), separableMino.getLowerY() - mino.getMinY());
-        field.insertWhiteLineWithKey(separableMino.getDeleteKey());
+        MinoOperationWithKey operationWithKey = separableMino.toMinoOperationWithKey();
+        Mino mino = operationWithKey.getMino();
+        field.put(mino, operationWithKey.getX(), separableMino.getLowerY() - mino.getMinY());
+        field.insertWhiteLineWithKey(operationWithKey.getNeedDeletedKey());
         return field;
     }
 
@@ -136,7 +137,8 @@ public class ToIndexMain {
     }
 
     private static String toIndexLine(SeparableMinos minos, SeparableMino mino) {
-        long deleteKey = mino.getDeleteKey();
+        MinoOperationWithKey operationWithKey = mino.toMinoOperationWithKey();
+        long deleteKey = operationWithKey.getNeedDeletedKey();
 
         int d = 0;
         for (int index = 0; index < 4; index++) {
@@ -146,9 +148,9 @@ public class ToIndexMain {
         }
 
         int index = minos.toIndex(mino);
-        String name = mino.getMino().getBlock().getName();
-        String rotate = getRotate(mino.getMino().getRotate());
-        int x = mino.getX();
+        String name = operationWithKey.getBlock().getName();
+        String rotate = getRotate(operationWithKey.getRotate());
+        int x = operationWithKey.getX();
         int lowerY = mino.getLowerY();
         String s = padding(Integer.toBinaryString(d));
         return String.format("%d,%s,%s,%d,%d,%s", index, name, rotate, x, lowerY, s);
@@ -190,7 +192,7 @@ public class ToIndexMain {
         boolean isNoDeleted() {
             return separableMinos.stream()
                     .skip(1)
-                    .allMatch(separableMino -> separableMino.getDeleteKey() == 0L);
+                    .allMatch(separableMino -> separableMino.toMinoOperationWithKey().getNeedDeletedKey() == 0L);
         }
 
         Field getPreField() {

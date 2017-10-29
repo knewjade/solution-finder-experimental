@@ -33,33 +33,33 @@ import java.util.stream.Collectors;
 public class PutterMain2 {
     public static void main(String[] args) throws ExecutionException, InterruptedException, IOException, SyntaxException {
         List<String> setupPattern = Arrays.asList(
-//                "I,O,L,J",
-//                "I,O,S,Z",
-//                "I,O,L,S",
-//                "I,O,J,Z",
-//                "I,O,J,S",
-//                "I,O,L,Z",
+//                "I,LAST_OPERATION,L,J",
+//                "I,LAST_OPERATION,S,Z",
+//                "I,LAST_OPERATION,L,S",
+//                "I,LAST_OPERATION,J,Z",
+//                "I,LAST_OPERATION,J,S",
+//                "I,LAST_OPERATION,L,Z",
 
 //                "I,L,J,S",
 //                "I,L,J,Z",
 //                "I,L,S,Z",
 //                "I,J,S,Z",
 
-//                "O,J,L,Z",
-//                "O,J,L,S",
+//                "LAST_OPERATION,J,L,Z",
+//                "LAST_OPERATION,J,L,S",
 
-//                "O,L,S,Z",
-//                "O,J,S,Z",
+//                "LAST_OPERATION,L,S,Z",
+//                "LAST_OPERATION,J,S,Z",
 
 //                "L,J,S,Z"
 
-//                "I,O,S,Z",
+//                "I,LAST_OPERATION,S,Z",
 //                "L,J,S,Z",
-                "T,I,O,S",
-                "T,I,O,Z",
+                "T,I,LAST_OPERATION,S",
+                "T,I,LAST_OPERATION,Z",
                 "I,T,S,Z",
-                "O,T,L,J",
-                "O,T,S,Z"
+                "LAST_OPERATION,T,L,J",
+                "LAST_OPERATION,T,S,Z"
         );
         int maxClearLine = 4;
 

@@ -64,7 +64,7 @@ public class SetupPercentMain {
                             .filter(longBlocks -> longBlocks.getLastBlock() == Block.T)
                             .anyMatch(longBlocks -> allBlocksSet.contains(new LongBlocks(longBlocks.blockStream().limit(6))));
                     tree.set(canBuildUp, blocks);
-                    System.out.println(blocks.blockStream().map(Block::getName).collect(Collectors.joining()) + "," + (canBuildUp ? "O" : "X"));
+                    System.out.println(blocks.blockStream().map(Block::getName).collect(Collectors.joining()) + "," + (canBuildUp ? "LAST_OPERATION" : "X"));
                 });
 //        System.out.println(tree.show());
 //        System.out.println(tree.tree(2));
