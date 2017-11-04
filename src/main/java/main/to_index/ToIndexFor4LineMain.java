@@ -1,4 +1,4 @@
-package _experimental;
+package main.to_index;
 
 import common.comparator.OperationWithKeyComparator;
 import common.datastore.MinoOperationWithKey;
@@ -7,7 +7,7 @@ import common.parser.StringEnumTransform;
 import core.field.KeyOperators;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
-import helper.DeleteKeyParser;
+import helper.KeyParser;
 import searcher.pack.separable_mino.AllMinoFactory;
 import searcher.pack.separable_mino.SeparableMino;
 
@@ -45,13 +45,14 @@ public class ToIndexFor4LineMain {
             for (int index = 0; index < separableMinos.size(); index++) {
                 SeparableMino mino = separableMinos.get(index);
                 MinoOperationWithKey operationWithKey = mino.toMinoOperationWithKey();
-                String format = String.format("%d,%s,%s,%d,%d,%s",
+                String format = String.format("%d,%s,%s,%d,%d,%s,%s",
                         index,
                         operationWithKey.getPiece().getName(),
                         StringEnumTransform.toString(operationWithKey.getRotate()),
                         operationWithKey.getX(),
-                        operationWithKey.getY(),
-                        DeleteKeyParser.parse(operationWithKey.getNeedDeletedKey(), HEIGHT)
+                        mino.getLowerY(),
+                        KeyParser.parseToString(operationWithKey.getUsingKey(), HEIGHT),
+                        KeyParser.parseToString(operationWithKey.getNeedDeletedKey(), HEIGHT)
                 );
                 System.out.println(format);
                 bufferedWriter.write(format);
