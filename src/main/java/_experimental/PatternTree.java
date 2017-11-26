@@ -4,11 +4,13 @@ import common.comparator.FieldComparator;
 import common.datastore.action.Action;
 import core.action.candidate.Candidate;
 import core.field.Field;
-import core.mino.Piece;
 import core.mino.MinoFactory;
+import core.mino.Piece;
 import searcher.common.validator.Validator;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
@@ -69,7 +71,7 @@ public class PatternTree implements IPatternTree {
         return run(visitor, 0);
     }
 
-        // すべての探索が成功したときtrueを返す
+    // すべての探索が成功したときtrueを返す
     @Override
     public boolean run(TreeVisitor visitor, int depth) {
         boolean result = true;
@@ -89,17 +91,17 @@ public class PatternTree implements IPatternTree {
 }
 
 class CommonObj {
-    CommonObj(ThreadLocal<Candidate<Action>> candidateThreadLocal, MinoFactory minoFactory, Validator validator) {
+    private ThreadLocal<Candidate<? extends Action>> candidateThreadLocal;
+    private MinoFactory minoFactory;
+    private Validator validator;
+
+    CommonObj(ThreadLocal<Candidate<? extends Action>> candidateThreadLocal, MinoFactory minoFactory, Validator validator) {
         this.candidateThreadLocal = candidateThreadLocal;
         this.minoFactory = minoFactory;
         this.validator = validator;
     }
 
-    private ThreadLocal<Candidate<Action>> candidateThreadLocal;
-    private MinoFactory minoFactory;
-    private Validator validator;
-
-    public Candidate<Action> getCandidate() {
+    public Candidate<? extends Action> getCandidate() {
         return candidateThreadLocal.get();
     }
 

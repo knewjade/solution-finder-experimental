@@ -6,14 +6,13 @@ import common.datastore.action.Action;
 import common.datastore.blocks.Pieces;
 import common.pattern.LoadedPatternGenerator;
 import common.pattern.PatternGenerator;
-import concurrent.LockedCandidateThreadLocal;
 import core.action.candidate.Candidate;
 import core.action.candidate.LockedCandidate;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
+import core.mino.Piece;
 import core.srs.MinoRotation;
 import lib.Stopwatch;
 import searcher.checker.CheckerUsingHold;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static core.mino.Piece.*;
 
-public class Main {
+public class HeuristicMain {
     public static void main(String[] args) throws SyntaxException {
         start();
     }
@@ -47,14 +46,7 @@ public class Main {
 //                "XXXX______"
         );
 
-        MinoFactory minoFactory = new MinoFactory();
         int height = 4;
-        LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(height);
-        PerfectValidator validator = new PerfectValidator();
-        CommonObj commonObj = new CommonObj(candidateThreadLocal, minoFactory, validator);
-//        tree.prepare(field, height, commonObj);
-
-
         UsingHoldPerfectTreeVisitor visitor = new UsingHoldPerfectTreeVisitor(field, height, 10);
 
         Stopwatch stopwatch = Stopwatch.createStartedStopwatch();

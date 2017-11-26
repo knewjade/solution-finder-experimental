@@ -99,8 +99,6 @@ public class PackMain {
         Stopwatch stopwatch2 = Stopwatch.createStartedStopwatch();
 
         // 探索フィールドを3x4の範囲に変換する
-        // TODO: 壁をみつけて分割統治
-        // TODO: すでにフィールドが埋まっている場合は探索しない
         List<InOutPairField> inOutPairFields = InOutPairField.createInOutPairFields(WIDTH, HEIGHT, initField);
         TaskResultHelper taskResultHelper = new Field4x10MinoPackingHelper();
         PerfectPackSearcher searcher = new PerfectPackSearcher(inOutPairFields, solutions, sizedBit, solutionFilter, taskResultHelper);

@@ -16,11 +16,11 @@ import java.util.TreeSet;
 
 public class PutterUsingHold<T extends Action> {
     private final CheckmateDataPool dataPool;
-    private final SimpleSearcherCore<T> searcherCore;
+    private final SimpleSearcherCore searcherCore;
 
     PutterUsingHold(MinoFactory minoFactory, Validator validator) {
         this.dataPool = new CheckmateDataPool();
-        this.searcherCore = new SimpleSearcherCore<T>(minoFactory, validator, dataPool);
+        this.searcherCore = new SimpleSearcherCore(minoFactory, validator, dataPool);
     }
 
     public TreeSet<Order> search(Field initField, List<Piece> pieces, Candidate<T> candidate, int maxClearLine, int maxDepth) {

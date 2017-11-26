@@ -10,16 +10,18 @@ import common.pattern.LoadedPatternGenerator;
 import common.pattern.PatternGenerator;
 import common.tree.AnalyzeTree;
 import concurrent.LockedCandidateThreadLocal;
+import concurrent.LockedReachableThreadLocal;
 import concurrent.checker.CheckerUsingHoldThreadLocal;
+import concurrent.checker.invoker.CheckerCommonObj;
 import concurrent.checker.invoker.using_hold.ConcurrentCheckerUsingHoldInvoker;
 import core.action.candidate.LockedCandidate;
 import core.field.Field;
 import core.field.FieldFactory;
 import core.field.FieldView;
-import core.mino.Piece;
 import core.mino.Mino;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
+import core.mino.Piece;
 import core.srs.MinoRotation;
 import searcher.checkmate.CheckmateNoHold;
 
@@ -129,9 +131,12 @@ public class PutterMain2 {
 
         LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(maxClearLine);
         CheckerUsingHoldThreadLocal<Action> checkerThreadLocal = new CheckerUsingHoldThreadLocal<>();
-        ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, candidateThreadLocal, checkerThreadLocal);
+        LockedReachableThreadLocal reachableThreadLocal = new LockedReachableThreadLocal(minoFactory, minoShifter, minoRotation, maxClearLine);
+        CheckerCommonObj commonObj = new CheckerCommonObj(minoFactory, candidateThreadLocal, checkerThreadLocal, reachableThreadLocal);
         PatternGenerator verifyGenerator = new LoadedPatternGenerator("*!");
         List<Pieces> searchingBlocks = verifyGenerator.blocksStream().collect(Collectors.toList());
+
+        ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, commonObj, verifyGenerator.getDepth());
 
         for (Pair<Field, Integer> pair : results) {
             if (pair.getValue() <= 1)
@@ -155,7 +160,6 @@ public class PutterMain2 {
         }
 
         System.exit(0);
-
 
         // Search setup field
         Set<Field> allFields2 = setupGenerator.blocksStream().parallel()

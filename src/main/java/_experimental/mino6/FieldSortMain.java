@@ -14,11 +14,16 @@ import common.tetfu.field.ColoredField;
 import common.tetfu.field.ColoredFieldFactory;
 import common.tree.AnalyzeTree;
 import concurrent.LockedCandidateThreadLocal;
+import concurrent.LockedReachableThreadLocal;
 import concurrent.checker.CheckerUsingHoldThreadLocal;
+import concurrent.checker.invoker.CheckerCommonObj;
 import concurrent.checker.invoker.using_hold.ConcurrentCheckerUsingHoldInvoker;
 import core.field.Field;
 import core.field.SmallField;
 import core.mino.MinoFactory;
+import core.mino.MinoShifter;
+import core.srs.MinoRotation;
+import helper.EasyPool;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -49,7 +54,10 @@ public class FieldSortMain {
         System.out.println(collect.size());
 
         // 設定
-        MinoFactory minoFactory = new MinoFactory();
+        EasyPool easyPool = new EasyPool();
+        MinoFactory minoFactory = easyPool.getMinoFactory();
+        MinoShifter minoShifter = easyPool.getMinoShifter();
+        MinoRotation minoRotation = easyPool.getMinoRotation();
         int maxClearLine = 4;
 
         // executorServiceの生成
@@ -59,12 +67,16 @@ public class FieldSortMain {
         // checkerの生成
         LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(maxClearLine);
         CheckerUsingHoldThreadLocal<Action> checkerThreadLocal = new CheckerUsingHoldThreadLocal<>();
-        ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, candidateThreadLocal, checkerThreadLocal);
+        LockedReachableThreadLocal reachableThreadLocal = new LockedReachableThreadLocal(minoFactory, minoShifter, minoRotation, maxClearLine);
+        CheckerCommonObj commonObj = new CheckerCommonObj(minoFactory, candidateThreadLocal, checkerThreadLocal, reachableThreadLocal);
 
         // 使用する4ミノのリスト
         String pattern = "L, *p4";
         PatternGenerator generator = new LoadedPatternGenerator(pattern);
         List<Pieces> pieces = generator.blocksStream().collect(Collectors.toList());
+
+        int fromDepth = generator.getDepth();
+        ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, commonObj, fromDepth);
 
         // 探索
         AtomicInteger counter = new AtomicInteger(0);

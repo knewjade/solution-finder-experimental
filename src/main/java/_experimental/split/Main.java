@@ -35,7 +35,7 @@ public class Main {
                     return true;
                 })
 //                .peek(operationWithKeys -> {
-//                    String encode = easyTetfu.encode(FieldFactory.createField(4), operationWithKeys, 4);
+//                    String encode = easyTetfu.encodeUrl(FieldFactory.createField(4), operationWithKeys, 4);
 //                    System.out.println(encode);
 //                })
                 .count();

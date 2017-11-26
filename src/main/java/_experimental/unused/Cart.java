@@ -39,7 +39,7 @@ import static core.mino.Piece.*;
 public class Cart {
     public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
         int maxClearLine;
-        String marks = "";
+        String marks;
         try (Scanner scanner = new Scanner(new File("field.txt"))) {
             if (!scanner.hasNextInt())
                 throw new IllegalArgumentException("Cannot read Field Height");
@@ -386,45 +386,45 @@ public class Cart {
             falseCounter += 1;
         }
 
-        public int getTrueCount() {
+        int getTrueCount() {
             return trueCounter;
         }
 
-        public int getAllCount() {
+        int getAllCount() {
             return trueCounter + falseCounter;
         }
 
-        public double getTruePercent() {
+        double getTruePercent() {
             int allCount = getAllCount();
             assert allCount != 0;
             return (double) trueCounter / allCount;
         }
 
-        public double getFalsePercent() {
+        double getFalsePercent() {
             int allCount = getAllCount();
             assert allCount != 0;
             return (double) falseCounter / allCount;
         }
 
-        public double getEntropy() {
-            int allCount = getAllCount();
-            return calcEntropy(trueCounter, allCount) + calcEntropy(falseCounter, allCount);
-        }
+//        public double getEntropy() {
+//            int allCount = getAllCount();
+//            return calcEntropy(trueCounter, allCount) + calcEntropy(falseCounter, allCount);
+//        }
 
-        private double calcEntropy(double count, double allCount) {
-            return (count / allCount) * log2(allCount / count);
-        }
+//        private double calcEntropy(double count, double allCount) {
+//            return (count / allCount) * log2(allCount / count);
+//        }
 
-        private double log2(double v) {
-            return Math.log(v) / Math.log(2);
-        }
+//        private double log2(double v) {
+//            return Math.log(v) / Math.log(2);
+//        }
     }
 
     private static class Split {
         private final List<Piece> left = new ArrayList<>();
         private final List<Piece> right = new ArrayList<>();
 
-        public Split(int v) {
+        Split(int v) {
             assert 0 < v && v < 64;
             for (Piece piece : Piece.values()) {
                 if ((v & 1) == 0)
@@ -435,11 +435,11 @@ public class Cart {
             }
         }
 
-        public List<Piece> getLeft() {
+        List<Piece> getLeft() {
             return left;
         }
 
-        public List<Piece> getRight() {
+        List<Piece> getRight() {
             return right;
         }
     }

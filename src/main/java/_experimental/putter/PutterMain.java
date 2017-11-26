@@ -1,8 +1,8 @@
 package _experimental.putter;
 
 import common.SyntaxException;
-import common.datastore.PieceCounter;
 import common.datastore.Pair;
+import common.datastore.PieceCounter;
 import common.datastore.action.Action;
 import common.datastore.blocks.Pieces;
 import common.datastore.order.Order;
@@ -11,14 +11,16 @@ import common.pattern.LoadedPatternGenerator;
 import common.pattern.PatternGenerator;
 import common.tree.AnalyzeTree;
 import concurrent.LockedCandidateThreadLocal;
+import concurrent.LockedReachableThreadLocal;
 import concurrent.checker.CheckerUsingHoldThreadLocal;
+import concurrent.checker.invoker.CheckerCommonObj;
 import concurrent.checker.invoker.using_hold.ConcurrentCheckerUsingHoldInvoker;
 import core.action.candidate.LockedCandidate;
 import core.field.Field;
 import core.field.FieldFactory;
-import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
+import core.mino.Piece;
 import core.srs.MinoRotation;
 import lib.MyFiles;
 import searcher.common.validator.PerfectValidator;
@@ -52,13 +54,17 @@ public class PutterMain {
 
         int core = Runtime.getRuntime().availableProcessors();
         ExecutorService executorService = Executors.newFixedThreadPool(core);
-        CheckerUsingHoldThreadLocal<Action> checkerThreadLocal = new CheckerUsingHoldThreadLocal<>();
         LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(maxClearLine);
-        ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, candidateThreadLocal, checkerThreadLocal);
+        CheckerUsingHoldThreadLocal<Action> checkerThreadLocal = new CheckerUsingHoldThreadLocal<>();
+        LockedReachableThreadLocal reachableThreadLocal = new LockedReachableThreadLocal(minoFactory, minoShifter, minoRotation, maxClearLine);
+        CheckerCommonObj commonObj = new CheckerCommonObj(minoFactory, candidateThreadLocal, checkerThreadLocal, reachableThreadLocal);
 
         PatternGenerator blocksGenerator = new LoadedPatternGenerator("*p7");
         List<Pieces> searchingPieces = blocksGenerator.blocksStream()
                 .collect(Collectors.toList());
+
+        int fromDepth = blocksGenerator.getDepth();
+        ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, commonObj, fromDepth);
 
         HashMap<Field, Connect> map = new HashMap<>();
         Comparator<Connect> connectComparator = Comparator.<Connect>comparingDouble(o -> o.percent).reversed();
@@ -83,9 +89,7 @@ public class PutterMain {
 
             ArrayList<Connect> results = new ArrayList<>();
 
-            int i = 0;
             for (Order order : orders) {
-                i++;
                 if (order.getMaxClearLine() < maxClearLine)
                     continue;
 
@@ -144,7 +148,7 @@ public class PutterMain {
         private final double percent;
         private int count = 1;
 
-        public Connect(Field field, double percent) {
+        Connect(Field field, double percent) {
             this.field = field;
             this.percent = percent;
         }

@@ -38,7 +38,7 @@ public class PutterMain3 {
             List<OperationWithKey> operationsList = result.getMemento().getOperationsStream(width).collect(Collectors.toList());
             PieceCounter pieceCounter = new PieceCounter(operationsList.stream().map(OperationWithKey::getPiece));
             if (allBlocks.containsAll(pieceCounter)) {
-                String encode = easyTetfu.encode(emptyField, operationsList, height);
+                String encode = easyTetfu.encodeUrl(emptyField, operationsList, height);
                 System.out.println(pieceCounter.getBlocks());
                 System.out.println(encode);
             }

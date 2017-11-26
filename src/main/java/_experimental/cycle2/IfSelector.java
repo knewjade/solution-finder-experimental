@@ -3,8 +3,9 @@ package _experimental.cycle2;
 import common.SyntaxException;
 import common.buildup.BuildUpStream;
 import common.datastore.*;
-import common.datastore.blocks.Pieces;
+import common.datastore.action.Action;
 import common.datastore.blocks.LongPieces;
+import common.datastore.blocks.Pieces;
 import common.iterable.CombinationIterable;
 import common.iterable.PermutationIterable;
 import common.order.ForwardOrderLookUp;
@@ -18,6 +19,7 @@ import common.tree.AnalyzeTree;
 import concurrent.LockedCandidateThreadLocal;
 import concurrent.LockedReachableThreadLocal;
 import concurrent.checker.CheckerUsingHoldThreadLocal;
+import concurrent.checker.invoker.CheckerCommonObj;
 import concurrent.checker.invoker.using_hold.ConcurrentCheckerUsingHoldInvoker;
 import core.action.reachable.LockedReachable;
 import core.column_field.ColumnField;
@@ -25,9 +27,9 @@ import core.field.Field;
 import core.field.FieldFactory;
 import core.field.FieldView;
 import core.field.SmallField;
-import core.mino.Piece;
 import core.mino.MinoFactory;
 import core.mino.MinoShifter;
+import core.mino.Piece;
 import core.srs.MinoRotation;
 import helper.EasyPath;
 import helper.EasyPool;
@@ -79,9 +81,21 @@ public class IfSelector {
         EasyPool easyPool = new EasyPool();
         EasyPath easyPath = new EasyPath(easyPool);
         EasyTetfu easyTetfu = new EasyTetfu(easyPool);
-        ForwardOrderLookUp lookUp = new ForwardOrderLookUp(maxDepth, 7);
         PatternGenerator blocksGenerator = new LoadedPatternGenerator("*p7");
+
+        int fromDepth = blocksGenerator.getDepth();
+        ForwardOrderLookUp lookUp = new ForwardOrderLookUp(maxDepth, fromDepth);
         List<Pieces> allPieces2 = blocksGenerator.blocksStream().collect(Collectors.toList());
+
+        MinoFactory minoFactory = easyPool.getMinoFactory();
+        MinoShifter minoShifter = easyPool.getMinoShifter();
+        MinoRotation minoRotation = easyPool.getMinoRotation();
+
+        LockedCandidateThreadLocal candidateThreadLocal = new LockedCandidateThreadLocal(height);
+        CheckerUsingHoldThreadLocal<Action> checkerThreadLocal = new CheckerUsingHoldThreadLocal<>();
+        LockedReachableThreadLocal reachableThreadLocal = new LockedReachableThreadLocal(minoFactory, minoShifter, minoRotation, height);
+        CheckerCommonObj commonObj = new CheckerCommonObj(minoFactory, candidateThreadLocal, checkerThreadLocal, reachableThreadLocal);
+        ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, commonObj, fromDepth);
 
         PieceCounter allIncluded = new PieceCounter(Piece.valueList());
 
@@ -100,7 +114,6 @@ public class IfSelector {
 
             // すべての検索するBlocks
             // パフェできる手順が対象
-            ConcurrentCheckerUsingHoldInvoker invoker = new ConcurrentCheckerUsingHoldInvoker(executorService, new LockedCandidateThreadLocal(height), new CheckerUsingHoldThreadLocal<>());
             List<Pair<Pieces, Boolean>> search = invoker.search(initField, allPieces2, height, maxDepth);
             List<Pieces> targetBlocks = search.stream()
                     .filter(Pair::getValue)
@@ -142,7 +155,7 @@ public class IfSelector {
                         .collect(Collectors.toList());
                 assert operationWithKeys.size() == maxDepth;
 
-                String tetfu = easyTetfu.encode(initField, operationWithKeys, height);
+                String tetfu = easyTetfu.encodeUrl(initField, operationWithKeys, height);
                 System.out.println(tetfu);
 
                 LockedReachable reachable = easyPool.getLockedReachable(height);
@@ -172,9 +185,6 @@ public class IfSelector {
         System.exit(0);
 
         // 準備
-        MinoFactory minoFactory = new MinoFactory();
-        MinoShifter minoShifter = new MinoShifter();
-        MinoRotation minoRotation = new MinoRotation();
         LockedReachable reachable = new LockedReachable(minoFactory, minoShifter, minoRotation, height);
         BuildUpStream buildUpStream = new BuildUpStream(reachable, height);
 
@@ -250,10 +260,10 @@ public class IfSelector {
 //                System.out.printf("pattern1 | %.2f | %.2f %n", pair1.getKey().getSuccessPercent(), pair1.getValue().getSuccessPercent());
 //                System.out.printf("pattern2 | %.2f | %.2f %n", pair2.getKey().getSuccessPercent(), pair2.getValue().getSuccessPercent());
 //
-                String tetfu1 = easyTetfu.encode(initField, operationWithKeys1, height);
+                String tetfu1 = easyTetfu.encodeUrl(initField, operationWithKeys1, height);
                 System.out.println(tetfu1);
 
-                String tetfu2 = easyTetfu.encode(initField, operationWithKeys1, height);
+                String tetfu2 = easyTetfu.encodeUrl(initField, operationWithKeys1, height);
                 System.out.println(tetfu2);
             }
         }

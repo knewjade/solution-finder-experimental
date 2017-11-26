@@ -60,7 +60,7 @@ public class Main {
         for (Result result : results) {
             List<OperationWithKey> operationWithKeys = result.getMemento().getOperationsStream(width)
                     .collect(Collectors.toList());
-            System.out.println(easyTetfu.encode(initField, operationWithKeys, height));
+            System.out.println(easyTetfu.encodeUrl(initField, operationWithKeys, height));
         }
 
         System.out.println(results.size());

@@ -1,17 +1,17 @@
 package _experimental.unused;
 
-import core.action.candidate.Candidate;
-import core.mino.Piece;
-import searcher.checker.Checker;
-import common.tree.AnalyzeTree;
-import core.field.Field;
-import core.field.FieldFactory;
-import lib.Stopwatch;
-import common.iterable.CombinationIterable;
+import common.datastore.action.Action;
 import common.iterable.AllPermutationIterable;
+import common.iterable.CombinationIterable;
+import common.tree.AnalyzeTree;
 import concurrent.LockedCandidateThreadLocal;
 import concurrent.checker.CheckerUsingHoldThreadLocal;
-import common.datastore.action.Action;
+import core.action.candidate.Candidate;
+import core.field.Field;
+import core.field.FieldFactory;
+import core.mino.Piece;
+import lib.Stopwatch;
+import searcher.checker.Checker;
 
 import java.util.ArrayList;
 import java.util.Arrays;

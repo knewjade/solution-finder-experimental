@@ -119,7 +119,7 @@ public class HighHeightPathMain {
 //                                return parseBlockFieldToTetfuElement(field, colorConverter, blockField, blocks.toString());
 //                            })
 //                            .map(element -> {
-//                                String encode = new Tetfu(minoFactory, colorConverter).encode(Collections.singletonList(element));
+//                                String encode = new Tetfu(minoFactory, colorConverter).encodeUrl(Collections.singletonList(element));
 //                                return element.getComment() + ": http://fumen.zui.jp/?v115@" + encode;
 //                            })
 //                            .forEach(System.out::println);
